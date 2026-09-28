@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <ellipse cx="256" cy="486" rx="150" ry="18" fill="#101828" opacity="0.10"/>
+  <!-- antenna -->
+  <path d="M256 70 V112" stroke="#1E3A8A" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="256" cy="58" r="20" fill="#F79009"/>
+  <!-- head -->
+  <rect x="120" y="104" width="272" height="196" rx="64" fill="#1D4ED8"/>
+  <rect x="104" y="170" width="28" height="64" rx="14" fill="#1E3A8A"/>
+  <rect x="380" y="170" width="28" height="64" rx="14" fill="#1E3A8A"/>
+  <!-- visor -->
+  <rect x="152" y="140" width="208" height="124" rx="46" fill="#FFFFFF"/>
+  <circle cx="210" cy="196" r="20" fill="#101828"/><circle cx="302" cy="196" r="20" fill="#101828"/>
+  <circle cx="217" cy="189" r="7" fill="#FFFFFF"/><circle cx="309" cy="189" r="7" fill="#FFFFFF"/>
+  <path d="M226 232 Q256 254 286 232" fill="none" stroke="#101828" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="180" cy="232" r="10" fill="#FDA29B" opacity="0.8"/><circle cx="332" cy="232" r="10" fill="#FDA29B" opacity="0.8"/>
+  <!-- body -->
+  <rect x="226" y="296" width="60" height="22" rx="8" fill="#1E3A8A"/>
+  <rect x="160" y="312" width="192" height="150" rx="44" fill="#1D4ED8"/>
+  <rect x="206" y="346" width="100" height="82" rx="18" fill="#DBE6FE"/>
+  <rect x="236" y="368" width="40" height="40" rx="8" fill="#0E9384"/>
+  <g stroke="#1D4ED8" stroke-width="8" stroke-linecap="round">
+    <path d="M246 356v-4"/><path d="M266 356v-4"/><path d="M246 420v4"/><path d="M266 420v4"/>
+  </g>
+  <!-- arms: one waving -->
+  <path d="M160 350 Q112 360 104 404" fill="none" stroke="#1E3A8A" stroke-width="24" stroke-linecap="round"/>
+  <path d="M352 350 Q404 320 412 268" fill="none" stroke="#1E3A8A" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="104" cy="412" r="20" fill="#F79009"/><circle cx="414" cy="256" r="20" fill="#F79009"/>
+</svg>

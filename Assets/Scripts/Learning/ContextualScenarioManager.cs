@@ -21,13 +21,13 @@ namespace ComputerExplorer.Learning
 
         public static string PhaseName(ScenarioPhase p) => p switch
         {
-            ScenarioPhase.Scenario => "Situasi",
-            ScenarioPhase.Question => "Pertanyaan",
-            ScenarioPhase.Explore => "Eksplorasi",
-            ScenarioPhase.Task => "Tugas",
-            ScenarioPhase.Feedback => "Umpan Balik",
-            ScenarioPhase.Reflection => "Refleksi",
-            _ => "Selesai"
+            ScenarioPhase.Scenario => Loc.T("Situasi", "Situation"),
+            ScenarioPhase.Question => Loc.T("Pertanyaan", "Question"),
+            ScenarioPhase.Explore => Loc.T("Eksplorasi", "Explore"),
+            ScenarioPhase.Task => Loc.T("Tugas", "Task"),
+            ScenarioPhase.Feedback => Loc.T("Umpan Balik", "Feedback"),
+            ScenarioPhase.Reflection => Loc.T("Refleksi", "Reflection"),
+            _ => Loc.T("Selesai", "Done")
         };
 
         private ContextualScenarioManager(ScenarioData scenario, ScenarioSession session)

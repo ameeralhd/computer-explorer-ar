@@ -28,10 +28,10 @@ namespace ComputerExplorer.UI.Screens
                 if (ar == null) return null;
                 return ar.Status switch
                 {
-                    ARTrackingState.Detected when ar.SelectedHotspot != null => $"{ar.SelectedHotspot.label}. {ar.SelectedHotspot.description}",
-                    ARTrackingState.Detected => $"{ar.Active.hardwareName}. {ar.Active.function} Ketuk titik oranye pada model untuk melihat bagian-bagiannya.",
+                    ARTrackingState.Detected when ar.SelectedHotspot != null => $"{ar.SelectedHotspot.Label}. {ar.SelectedHotspot.Description}",
+                    ARTrackingState.Detected => $"{ar.Active.hardwareName}. {ar.Active.Function} " + Loc.T("Ketuk titik oranye pada model untuk melihat bagian-bagiannya.", "Tap the orange dots on the model to see its parts."),
                     ARTrackingState.Error => ar.ErrorMessage,
-                    _ => $"Arahkan kamera ke kartu target {TargetName}. Pegang perangkat dengan stabil sekitar 20 sampai 40 sentimeter di atas kartu."
+                    _ => Loc.T($"Arahkan kamera ke kartu target {TargetName}. Pegang perangkat dengan stabil sekitar 20 sampai 40 sentimeter di atas kartu.", $"Point the camera at the {TargetName} target card. Hold the device steady about 20 to 40 centimetres above the card.")
                 };
             }
         }
@@ -41,7 +41,7 @@ namespace ComputerExplorer.UI.Screens
         private Text flowCaption;
         private int shownFlowStep = -1;
 
-        private string TargetName => ar != null && ar.Focus != null ? ar.Focus.hardwareName : "komputer";
+        private string TargetName => ar != null && ar.Focus != null ? ar.Focus.hardwareName : Loc.T("komputer", "computer");
 
         protected override void OnOpened()
         {
@@ -99,19 +99,20 @@ namespace ComputerExplorer.UI.Screens
             UIKit.Layout(bar, minHeight: DesignTokens.HeaderHeight);
             UIKit.AddHorizontal(bar, DesignTokens.Dp(4), DesignTokens.Space1, DesignTokens.Dp(4));
             var fg = P.OnARChrome;
-            UIKit.IconButton(bar, Icons.Back, "Kembali", Nav.Back, ButtonVariant.Ghost, fg);
+            UIKit.IconButton(bar, Icons.Back, Loc.T("Kembali", "Back"), Nav.Back, ButtonVariant.Ghost, fg);
             var titles = UIKit.Flex(UIKit.VStack(bar, 0));
             UIKit.LabelColored(titles, "AR Explorer", TextStyle.Heading, fg);
-            string sub = ar.Focus != null ? $"Target: {ar.Focus.hardwareName}" : "Semua target aktif";
+            string sub = ar.Focus != null ? $"Target: {ar.Focus.hardwareName}" : Loc.T("Semua target aktif", "All targets active");
             if (Learning.IsLessonStep(LessonStepType.AR)) sub = Learning.Lesson.StepLabel + " · " + sub;
             UIKit.LabelColored(titles, sub, TextStyle.Caption, fg);
             bool speaking = Narration.IsSpeaking && Narration.CurrentText == ScreenNarration;
-            UIKit.IconButton(bar, speaking ? Icons.Pause : Icons.Volume, "Bacakan petunjuk", () =>
+            UIKit.IconButton(bar, speaking ? Icons.Pause : Icons.Volume, Loc.T("Bacakan petunjuk", "Read instructions aloud"), () =>
             {
                 Narration.Toggle(ScreenNarration);
                 Render();
             }, ButtonVariant.Ghost, fg);
-            UIKit.IconButton(bar, Icons.Settings, "Pengaturan aksesibilitas", () => Go(AppConstants.Scenes.Accessibility),
+            UIKit.LanguageToggleButton(bar);
+            UIKit.IconButton(bar, Icons.Settings, Loc.T("Pengaturan", "Settings"), () => Go(AppConstants.Scenes.Accessibility),
                 ButtonVariant.Ghost, fg);
 
             var chips = UIKit.HStack(top, DesignTokens.Space1, align: TextAnchor.MiddleCenter);
@@ -119,7 +120,7 @@ namespace ComputerExplorer.UI.Screens
             var status = UIKit.Badge(chips, text, bg, chipFg, icon);
             if (ar.Status == ARTrackingState.Searching || ar.Status == ARTrackingState.Initializing)
                 status.gameObject.AddComponent<PulseAnimator>();
-            if (ar.IsSimulated) UIKit.Badge(chips, "Mode Simulasi", P.ARChrome, P.OnARChrome, Icons.Phone);
+            if (ar.IsSimulated) UIKit.Badge(chips, Loc.T("Mode Simulasi", "Simulation Mode"), P.ARChrome, P.OnARChrome, Icons.Phone);
         }
 
         private (string text, string icon, Color bg, Color fg) StatusStyle()
@@ -128,11 +129,11 @@ namespace ComputerExplorer.UI.Screens
             Color onColor = hc ? Color.black : Color.white;
             return ar.Status switch
             {
-                ARTrackingState.Initializing => ("Menyiapkan kamera AR…", Icons.Refresh, P.ARChrome, P.OnARChrome),
-                ARTrackingState.Searching => ("Mencari target…", Icons.Scan, P.ARChrome, P.OnARChrome),
-                ARTrackingState.Detected => ($"Target terdeteksi: {ar.Active.hardwareName}", Icons.CheckCircle, P.Success, onColor),
-                ARTrackingState.Lost => ("Target hilang", Icons.Alert, P.Warning, onColor),
-                _ => ("AR bermasalah", Icons.XCircle, P.Error, onColor)
+                ARTrackingState.Initializing => (Loc.T("Menyiapkan kamera AR…", "Starting AR camera…"), Icons.Refresh, P.ARChrome, P.OnARChrome),
+                ARTrackingState.Searching => (Loc.T("Mencari target…", "Searching for target…"), Icons.Scan, P.ARChrome, P.OnARChrome),
+                ARTrackingState.Detected => (Loc.T("Target terdeteksi", "Target detected") + $": {ar.Active.hardwareName}", Icons.CheckCircle, P.Success, onColor),
+                ARTrackingState.Lost => (Loc.T("Target hilang", "Target lost"), Icons.Alert, P.Warning, onColor),
+                _ => (Loc.T("AR bermasalah", "AR problem"), Icons.XCircle, P.Error, onColor)
             };
         }
 
@@ -162,7 +163,7 @@ namespace ComputerExplorer.UI.Screens
             fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             UIKit.AddHorizontal(pill, DesignTokens.Space1, DesignTokens.Space2, DesignTokens.Dp(8), TextAnchor.MiddleCenter);
             UIKit.Icon(pill, Icons.Target, DesignTokens.IconSizeSmall, P.OnARChrome);
-            UIKit.LabelColored(pill, ar.Status == ARTrackingState.Lost ? "Arahkan kembali ke kartu target" : $"Letakkan target {TargetName} di sini",
+            UIKit.LabelColored(pill, ar.Status == ARTrackingState.Lost ? Loc.T("Arahkan kembali ke kartu target", "Point back at the target card") : Loc.T($"Letakkan target {TargetName} di sini", $"Place the {TargetName} target here"),
                 TextStyle.Label, P.OnARChrome);
         }
 
@@ -216,7 +217,7 @@ namespace ComputerExplorer.UI.Screens
                 detected ? ButtonState.Normal : ButtonState.Disabled, compact: true);
             UIKit.Button(controls, $"Zoom {zoom:0.#}×", () => ar.CycleZoom(), ButtonVariant.Secondary, Icons.ZoomIn,
                 detected ? ButtonState.Normal : ButtonState.Disabled, compact: true);
-            UIKit.Button(controls, "Bantuan", () => Go(AppConstants.Scenes.Help), ButtonVariant.Secondary, Icons.Help, compact: true);
+            UIKit.Button(controls, Loc.T("Bantuan", "Help"), () => Go(AppConstants.Scenes.Help), ButtonVariant.Secondary, Icons.Help, compact: true);
         }
 
         private void BuildPanel(RectTransform panel)
@@ -224,14 +225,14 @@ namespace ComputerExplorer.UI.Screens
             switch (ar.Status)
             {
                 case ARTrackingState.Error:
-                    UIKit.Callout(panel, Icons.Alert, "AR tidak dapat dimulai", ar.ErrorMessage, ColorRole.Error, ColorRole.ErrorSoft);
-                    UIKit.Label(panel, "Kamu tetap bisa belajar dengan Mode Simulasi: model 3D ditampilkan tanpa kamera.", TextStyle.Body);
-                    UIKit.Button(panel, "Gunakan Mode Simulasi", ar.SwitchToSimulation, ButtonVariant.Primary, Icons.Phone);
+                    UIKit.Callout(panel, Icons.Alert, Loc.T("AR tidak dapat dimulai", "AR could not start"), ar.ErrorMessage, ColorRole.Error, ColorRole.ErrorSoft);
+                    UIKit.Label(panel, Loc.T("Kamu tetap bisa belajar dengan Mode Simulasi: model 3D ditampilkan tanpa kamera.", "You can still learn with Simulation Mode: the 3D models are shown without the camera."), TextStyle.Body);
+                    UIKit.Button(panel, Loc.T("Gunakan Mode Simulasi", "Use Simulation Mode"), ar.SwitchToSimulation, ButtonVariant.Primary, Icons.Phone);
                     break;
 
                 case ARTrackingState.Initializing:
-                    UIKit.Label(panel, "Menyiapkan kamera…", TextStyle.Heading);
-                    UIKit.Label(panel, "Jika diminta, izinkan aplikasi menggunakan kamera.", TextStyle.Body, ColorRole.TextSecondary);
+                    UIKit.Label(panel, Loc.T("Menyiapkan kamera…", "Starting camera…"), TextStyle.Heading);
+                    UIKit.Label(panel, Loc.T("Jika diminta, izinkan aplikasi menggunakan kamera.", "If asked, allow the app to use the camera."), TextStyle.Body, ColorRole.TextSecondary);
                     break;
 
                 case ARTrackingState.Detected:
@@ -247,32 +248,34 @@ namespace ComputerExplorer.UI.Screens
             var target = ar.Focus ?? ar.Active;
             if (target == null) return;
             if (ar.IsActivityComplete(target) && ar.Status == ARTrackingState.Detected)
-                UIKit.Callout(panel, Icons.Trophy, "Aktivitas AR selesai!", "Kamu sudah menjelajahi bagian-bagian penting.",
+                UIKit.Callout(panel, Icons.Trophy, Loc.T("Aktivitas AR selesai!", "AR activity complete!"), Loc.T("Kamu sudah menjelajahi bagian-bagian penting.", "You have explored the important parts."),
                     ColorRole.Success, ColorRole.SuccessSoft);
             else if (Learning.IsLessonStep(LessonStepType.AR))
-                UIKit.Label(panel, $"Jelajahi minimal {ar.RequiredCount(target)} bagian untuk melanjutkan pelajaran.",
+                UIKit.Label(panel, Loc.T($"Jelajahi minimal {ar.RequiredCount(target)} bagian untuk melanjutkan pelajaran.", $"Explore at least {ar.RequiredCount(target)} parts to continue the lesson."),
                     TextStyle.Caption, ColorRole.TextSecondary);
         }
 
         private void BuildSearching(RectTransform panel)
         {
-            UIKit.Label(panel, "Pindai kartu target", TextStyle.Heading);
+            UIKit.Label(panel, Loc.T("Pindai kartu target", "Scan a target card"), TextStyle.Heading);
             UIKit.Label(panel, ar.Focus != null
-                    ? $"Arahkan kamera ke kartu {ar.Focus.hardwareName}. Pastikan seluruh kartu terlihat dan cukup terang."
-                    : "Arahkan kamera ke salah satu kartu target (CPU, RAM, Storage, Keyboard, dll.).",
+                    ? Loc.T($"Arahkan kamera ke kartu {ar.Focus.hardwareName}. Pastikan seluruh kartu terlihat dan cukup terang.", $"Point the camera at the {ar.Focus.hardwareName} card. Make sure the whole card is visible and well lit.")
+                    : Loc.T("Arahkan kamera ke salah satu kartu target (CPU, RAM, Storage, Keyboard, dll.).", "Point the camera at any target card (CPU, RAM, Storage, Keyboard, etc.)."),
                 TextStyle.Body, ColorRole.TextSecondary);
 
             if (ar.Status == ARTrackingState.Lost && ar.ShowRecoveryHelp)
             {
-                UIKit.Callout(panel, Icons.Lightbulb, "Target sulit ditemukan?",
-                    "• Nyalakan lampu atau pindah ke tempat lebih terang.\n• Jaga jarak 20–40 cm dari kartu.\n" +
-                    "• Pastikan seluruh kartu terlihat dan tidak terlipat.\n• Gerakkan perangkat perlahan, tahan stabil 2 detik.",
+                UIKit.Callout(panel, Icons.Lightbulb, Loc.T("Target sulit ditemukan?", "Having trouble finding the target?"),
+                    Loc.T("• Nyalakan lampu atau pindah ke tempat lebih terang.\n• Jaga jarak 20–40 cm dari kartu.\n" +
+                          "• Pastikan seluruh kartu terlihat dan tidak terlipat.\n• Gerakkan perangkat perlahan, tahan stabil 2 detik.",
+                          "• Turn on a light or move somewhere brighter.\n• Keep 20–40 cm from the card.\n" +
+                          "• Make sure the whole card is visible and flat.\n• Move the device slowly and hold it steady for 2 seconds."),
                     ColorRole.Warning, ColorRole.WarningSoft);
             }
 
             if (ar.IsSimulated)
             {
-                UIKit.Label(panel, "Mode Simulasi — pilih kartu yang ingin \"dipindai\":", TextStyle.Label, ColorRole.TextSecondary);
+                UIKit.Label(panel, Loc.T("Mode Simulasi — pilih kartu yang ingin \"dipindai\":", "Simulation Mode — choose the card to \"scan\":"), TextStyle.Label, ColorRole.TextSecondary);
                 var list = ar.AvailableHardware.ToList();
                 int perRow = TextSizeController.IsLarge ? 2 : 3;
                 RectTransform row = null;
@@ -293,46 +296,46 @@ namespace ComputerExplorer.UI.Screens
             var head = UIKit.HStack(panel, DesignTokens.Dp(12));
             UIKit.IconTile(head, h.iconName, P.Category(h.category), P.OnCategory, DesignTokens.Dp(44));
             var t = UIKit.Flex(UIKit.VStack(head, DesignTokens.Dp(2)));
-            UIKit.Label(t, $"{h.hardwareName} — {h.fullName}", TextStyle.Heading);
+            UIKit.Label(t, $"{h.hardwareName} — {h.FullName}", TextStyle.Heading);
             UIKit.Label(t, h.category.DisplayName(), TextStyle.Caption, ColorRole.TextSecondary);
-            UIKit.Label(panel, $"<b>Fungsi:</b> {h.function}", TextStyle.Body);
+            UIKit.Label(panel, $"<b>{Loc.T("Fungsi", "Function")}:</b> {h.Function}", TextStyle.Body);
 
             var flow = ar.ActiveObject?.DataFlow;
             if (flow != null)
             {
-                var fc = UIKit.Callout(panel, Icons.Workflow, "Alur data (ikuti titik kuning)", flow.Caption, ColorRole.Primary, ColorRole.PrimarySoft);
+                var fc = UIKit.Callout(panel, Icons.Workflow, Loc.T("Alur data (ikuti titik kuning)", "Data flow (follow the yellow dot)"), flow.Caption, ColorRole.Primary, ColorRole.PrimarySoft);
                 flowCaption = fc.GetComponentsInChildren<Text>().LastOrDefault();
                 shownFlowStep = flow.Step;
             }
 
             int explored = ar.ExploredCount(h);
-            UIKit.ProgressRow(panel, "Bagian dijelajahi", $"{explored}/{h.hotspots.Count}",
+            UIKit.ProgressRow(panel, Loc.T("Bagian dijelajahi", "Parts explored"), $"{explored}/{h.hotspots.Count}",
                 h.hotspots.Count == 0 ? 1f : (float)explored / h.hotspots.Count, P.Success);
             if (explored < h.hotspots.Count)
-                UIKit.Label(panel, "Ketuk titik oranye pada model, atau pilih bagian di bawah.", TextStyle.Caption, ColorRole.TextSecondary);
+                UIKit.Label(panel, Loc.T("Ketuk titik oranye pada model, atau pilih bagian di bawah.", "Tap the orange dots on the model, or choose a part below."), TextStyle.Caption, ColorRole.TextSecondary);
 
             var actions = UIKit.EqualRow(panel, DesignTokens.Space1);
-            NarrationControl(actions, h.NarrationText, h.narration);
-            UIKit.Button(actions, expanded ? "Ringkas" : "Info Lengkap", () =>
+            NarrationControl(actions, h.NarrationText, h.NarrationClip);
+            UIKit.Button(actions, expanded ? Loc.T("Ringkas", "Less") : Loc.T("Info Lengkap", "Full Info"), () =>
             {
                 expanded = !expanded;
                 Render();
             }, ButtonVariant.Secondary, expanded ? Icons.Close : Icons.Info, compact: true);
 
             // Hotspot list: an accessible alternative to tapping small 3D targets.
-            UIKit.Label(panel, "Bagian-bagian", TextStyle.Overline, ColorRole.TextSecondary);
+            UIKit.Label(panel, Loc.T("Bagian-bagian", "Parts"), TextStyle.Overline, ColorRole.TextSecondary);
             foreach (var hs in h.hotspots)
             {
                 bool done = ar.IsExplored(h, hs.hotspotId);
-                UIKit.Button(panel, ARHotspot.ShortLabel(hs.label) + (done ? " · dilihat" : ""), () => ar.SelectHotspot(h, hs),
+                UIKit.Button(panel, ARHotspot.ShortLabel(hs.Label) + (done ? Loc.T(" · dilihat", " · seen") : ""), () => ar.SelectHotspot(h, hs),
                     done ? ButtonVariant.Tonal : ButtonVariant.Secondary, done ? Icons.CheckCircle : Icons.Target, compact: true);
             }
 
             if (expanded)
             {
                 UIKit.Divider(panel);
-                UIKit.Label(panel, h.detailedDescription, TextStyle.Body);
-                UIKit.Callout(panel, Icons.Globe, "Contoh nyata", h.contextualExample, ColorRole.Primary, ColorRole.PrimarySoft);
+                UIKit.Label(panel, h.DetailedDescription, TextStyle.Body);
+                UIKit.Callout(panel, Icons.Globe, Loc.T("Contoh nyata", "Real-life example"), h.ContextualExample, ColorRole.Primary, ColorRole.PrimarySoft);
             }
         }
 
@@ -341,14 +344,14 @@ namespace ComputerExplorer.UI.Screens
             var h = ar.Active;
             var hs = ar.SelectedHotspot;
             UIKit.Label(panel, h.hardwareName, TextStyle.Overline, ColorRole.TextSecondary);
-            UIKit.Label(panel, hs.label, TextStyle.Heading);
-            UIKit.Label(panel, hs.description, TextStyle.Body);
-            NarrationControl(panel, $"{hs.label}. {hs.description}", hs.narration);
+            UIKit.Label(panel, hs.Label, TextStyle.Heading);
+            UIKit.Label(panel, hs.Description, TextStyle.Body);
+            NarrationControl(panel, $"{hs.Label}. {hs.Description}", hs.Clip);
             var row = UIKit.EqualRow(panel, DesignTokens.Space1);
-            UIKit.Button(row, "Tutup", ar.ClearSelection, ButtonVariant.Secondary, Icons.Close, compact: true);
-            UIKit.Button(row, "Berikutnya", ar.NextHotspot, ButtonVariant.Primary, Icons.Forward, compact: true, iconRight: true);
+            UIKit.Button(row, Loc.T("Tutup", "Close"), ar.ClearSelection, ButtonVariant.Secondary, Icons.Close, compact: true);
+            UIKit.Button(row, Loc.T("Berikutnya", "Next"), ar.NextHotspot, ButtonVariant.Primary, Icons.Forward, compact: true, iconRight: true);
             int explored = ar.ExploredCount(h);
-            UIKit.ProgressRow(panel, "Bagian dijelajahi", $"{explored}/{h.hotspots.Count}",
+            UIKit.ProgressRow(panel, Loc.T("Bagian dijelajahi", "Parts explored"), $"{explored}/{h.hotspots.Count}",
                 h.hotspots.Count == 0 ? 1f : (float)explored / h.hotspots.Count, P.Success);
         }
 
@@ -361,9 +364,9 @@ namespace ComputerExplorer.UI.Screens
 
             if (!lessonShown && !string.IsNullOrEmpty(State.ARReturnScene))
             {
-                string label = State.ARReturnScene == AppConstants.Scenes.ContextualLearning ? "Kembali ke skenario"
-                    : State.ARReturnScene == AppConstants.Scenes.Practice ? "Kembali ke latihan"
-                    : "Kembali";
+                string label = State.ARReturnScene == AppConstants.Scenes.ContextualLearning ? Loc.T("Kembali ke skenario", "Back to scenario")
+                    : State.ARReturnScene == AppConstants.Scenes.Practice ? Loc.T("Kembali ke latihan", "Back to practice")
+                    : Loc.T("Kembali", "Back");
                 UIKit.Button(panel, label, Nav.Back, complete ? ButtonVariant.Primary : ButtonVariant.Secondary, Icons.Back);
             }
         }

@@ -10,17 +10,17 @@ namespace ComputerExplorer.AR
     /// </summary>
     public class ARDataFlowController : MonoBehaviour
     {
-        public static readonly string[] StepCaptions =
+        private static readonly (string id, string en)[] Captions =
         {
-            "Input › Memori: data dari keyboard disimpan di RAM",
-            "Memori › CPU: CPU mengambil instruksi dan data (fetch)",
-            "CPU › Output: hasil proses dikirim ke monitor",
-            "Output › Input: siklus berulang untuk data berikutnya"
+            ("Input › Memori: data dari keyboard disimpan di RAM", "Input › Memory: keyboard data is stored in RAM"),
+            ("Memori › CPU: CPU mengambil instruksi dan data (fetch)", "Memory › CPU: the CPU fetches instructions and data"),
+            ("CPU › Output: hasil proses dikirim ke monitor", "CPU › Output: the result is sent to the monitor"),
+            ("Output › Input: siklus berulang untuk data berikutnya", "Output › Input: the cycle repeats for the next data")
         };
 
         public event Action<int> StepChanged;
         public int Step { get; private set; }
-        public string Caption => StepCaptions[Step];
+        public string Caption => Core.Loc.T(Captions[Step].id, Captions[Step].en);
 
         private Transform packet;
         private Vector3[] points;

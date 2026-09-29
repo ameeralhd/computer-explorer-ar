@@ -4,19 +4,19 @@ using UnityEngine;
 namespace ComputerExplorer.Audio
 {
     /// <summary>
-    /// Thin wrapper over android.speech.tts.TextToSpeech using the Indonesian locale (id-ID).
+    /// Thin wrapper over android.speech.tts.TextToSpeech. The voice follows the app language
+    /// (id-ID for Bahasa Indonesia, en-US for English).
     /// Used as the narration fallback when a content item has no recorded AudioClip, so every piece
     /// of educational text is always available as audio. No-op outside Android devices.
     /// </summary>
     public sealed class AndroidTextToSpeech : IDisposable
     {
-        public bool IsReady => initStatus == 0 && EnsureConfigured();
+        public bool IsReady => initStatus == 0;
         public bool LanguageAvailable { get; private set; }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
         private AndroidJavaObject tts;
         private volatile int initStatus = int.MinValue;
-        private bool configured;
         private int utteranceCounter;
 
         private sealed class InitListener : AndroidJavaProxy
@@ -42,23 +42,26 @@ namespace ComputerExplorer.Audio
             }
         }
 
-        private bool EnsureConfigured()
+        private string configuredLocale;
+
+        /// <summary>Switch the voice to the given locale if it is not already active.</summary>
+        private void EnsureLocale(string lang, string country)
         {
-            if (configured) return true;
-            configured = true;
+            string key = lang + "-" + country;
+            if (configuredLocale == key) return;
+            configuredLocale = key;
             try
             {
-                using var locale = new AndroidJavaObject("java.util.Locale", "id", "ID");
+                using var locale = new AndroidJavaObject("java.util.Locale", lang, country);
                 // LANG_MISSING_DATA = -1, LANG_NOT_SUPPORTED = -2
                 LanguageAvailable = tts.Call<int>("setLanguage", locale) >= 0;
                 if (!LanguageAvailable)
-                    Debug.LogWarning("[TTS] Indonesian voice not installed. Install it in Android Settings > Text-to-speech.");
+                    Debug.LogWarning($"[TTS] Voice {key} not installed. Install it in Android Settings > Text-to-speech.");
             }
             catch (Exception e)
             {
                 Debug.LogWarning("[TTS] " + e.Message);
             }
-            return true;
         }
 
         public bool Speak(string text, float volume, float rate)
@@ -66,6 +69,8 @@ namespace ComputerExplorer.Audio
             if (tts == null || !IsReady || string.IsNullOrWhiteSpace(text)) return false;
             try
             {
+                var (lang, country) = Core.Loc.SpeechLocale;
+                EnsureLocale(lang, country);
                 tts.Call<int>("setSpeechRate", rate);
                 using var bundle = new AndroidJavaObject("android.os.Bundle");
                 bundle.Call("putFloat", "volume", Mathf.Clamp01(volume)); // TextToSpeech.Engine.KEY_PARAM_VOLUME
@@ -101,7 +106,6 @@ namespace ComputerExplorer.Audio
         }
 #else
         private int initStatus = -1;
-        private bool EnsureConfigured() => false;
         public bool Speak(string text, float volume, float rate) => false;
         public bool IsSpeaking => false;
         public void Stop() { }

@@ -37,7 +37,7 @@ namespace ComputerExplorer.Learning
             get
             {
                 var m = ActiveModule;
-                return m == null ? "" : $"Langkah {StepIndex + 1} dari {m.lessonSteps.Count}";
+                return m == null ? "" : Loc.T($"Langkah {StepIndex + 1} dari {m.lessonSteps.Count}", $"Step {StepIndex + 1} of {m.lessonSteps.Count}");
             }
         }
 
@@ -113,7 +113,7 @@ namespace ComputerExplorer.Learning
                     scene = AppConstants.Scenes.Practice;
                     break;
                 default:
-                    State.SetReflection(m.moduleId, m.reflectionPrompt);
+                    State.SetReflection(m.moduleId, null); // prompt is read from the module in the current language
                     scene = AppConstants.Scenes.Reflection;
                     break;
             }

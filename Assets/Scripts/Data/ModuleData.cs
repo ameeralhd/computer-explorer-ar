@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ComputerExplorer.Core;
 using UnityEngine;
 
 namespace ComputerExplorer.Data
@@ -10,12 +11,12 @@ namespace ComputerExplorer.Data
     {
         public static string DisplayName(this LessonStepType t) => t switch
         {
-            LessonStepType.VonNeumann => "Arsitektur Von Neumann",
-            LessonStepType.AR => "Eksplorasi AR",
-            LessonStepType.HardwareExplorer => "Jelajah Hardware",
-            LessonStepType.Scenario => "Skenario Kontekstual",
-            LessonStepType.Practice => "Latihan",
-            LessonStepType.Reflection => "Refleksi",
+            LessonStepType.VonNeumann => Loc.T("Arsitektur Von Neumann", "Von Neumann Architecture"),
+            LessonStepType.AR => Loc.T("Eksplorasi AR", "AR Exploration"),
+            LessonStepType.HardwareExplorer => Loc.T("Jelajah Hardware", "Hardware Explorer"),
+            LessonStepType.Scenario => Loc.T("Skenario Kontekstual", "Contextual Scenario"),
+            LessonStepType.Practice => Loc.T("Latihan", "Practice"),
+            LessonStepType.Reflection => Loc.T("Refleksi", "Reflection"),
             _ => t.ToString()
         };
 
@@ -50,6 +51,14 @@ namespace ComputerExplorer.Data
         [TextArea(2, 4)] public string description;
         [Tooltip("Learning objectives (one per entry).")]
         public List<string> learningObjective = new List<string>();
+        [TextArea(2, 4)] public string reflectionPrompt;
+
+        [Header("English")]
+        public string titleEn;
+        [TextArea(2, 4)] public string descriptionEn;
+        public List<string> learningObjectiveEn = new List<string>();
+        [TextArea(2, 4)] public string reflectionPromptEn;
+
         public Sprite thumbnail;
         public string iconName = "book-open";
         public int estimatedMinutes = 20;
@@ -58,6 +67,14 @@ namespace ComputerExplorer.Data
         public List<QuestionData> questions = new List<QuestionData>();
         [Tooltip("The guided learning sequence started from Module Detail.")]
         public List<LessonStep> lessonSteps = new List<LessonStep>();
-        [TextArea(2, 4)] public string reflectionPrompt;
+
+        public string Title => Loc.T(title, titleEn);
+        public string Description => Loc.T(description, descriptionEn);
+        public string ReflectionPrompt => Loc.T(reflectionPrompt, reflectionPromptEn);
+
+        public IReadOnlyList<string> Objectives =>
+            Loc.IsEnglish && learningObjectiveEn != null && learningObjectiveEn.Count == learningObjective.Count
+                ? learningObjectiveEn
+                : learningObjective;
     }
 }

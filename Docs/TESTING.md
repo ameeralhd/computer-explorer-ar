@@ -22,6 +22,7 @@ where possible on one tablet and one low-end device.
 | 15 | Quiz | Answer each question type right and wrong | Correct/incorrect logic and explanations match QuestionData; results summary is correct | ☐ |
 | 16 | Scenario | Complete a scenario via AR, and another via "Baca info tanpa kamera" | Both paths unlock the task; feedback and reflection are saved; the scenario shows "Selesai" | ☐ |
 | 17 | UI scaling | Portrait on all test devices, including notch / gesture-bar phones | Controls inside the safe area; nothing at the extreme edges; content ≤ 560 dp wide on tablets | ☐ |
+| 19 | Language | Switch ID ⇄ EN with the header flag and with the Settings/Welcome/Main Menu selectors, on every screen (including AR and mid-question) | All text, lessons, questions, hotspot labels and narration change language immediately; choice is kept after restart; a half-answered question keeps its answer | ☐ |
 | 18 | Performance | Profile the AR scene on a low-end device | Stable ≥ 30 fps; only focus targets active in lessons; no repeated instantiation | ☐ |
 
 ## Android delivery checklist (§20)

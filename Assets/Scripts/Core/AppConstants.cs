@@ -4,8 +4,8 @@ namespace ComputerExplorer.Core
     public static class AppConstants
     {
         public const string AppName = "Computer Explorer";
-        public const string AppTagline = "Belajar perangkat & arsitektur komputer dengan AR";
-        public const string NarrationLanguage = "Bahasa Indonesia";
+        public static string AppTagline => Loc.T("Belajar perangkat & arsitektur komputer dengan AR", "Learn computer hardware & architecture with AR");
+        public static string NarrationLanguage => Loc.NativeName(Loc.Current);
 
         public static class Scenes
         {

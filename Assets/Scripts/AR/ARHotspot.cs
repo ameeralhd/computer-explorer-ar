@@ -44,7 +44,7 @@ namespace ComputerExplorer.AR
             hs.Hardware = hardware;
             hs.rend = go.GetComponent<Renderer>();
             hs.baseScale = Size;
-            hs.label = ARLabel.Create(modelSpace, data.localPosition + Vector3.up * 0.11f, ShortLabel(data.label));
+            hs.label = ARLabel.Create(modelSpace, data.localPosition + Vector3.up * 0.11f, ShortLabel(data.Label));
             hs.Apply();
             return hs;
         }
@@ -69,6 +69,9 @@ namespace ComputerExplorer.AR
             label.SetVisible(visible);
         }
 
+        /// <summary>Re-apply colours and label text (after a language or contrast change).</summary>
+        public void Refresh() => Apply();
+
         private void Apply()
         {
             var p = ContrastController.Current;
@@ -77,7 +80,7 @@ namespace ComputerExplorer.AR
                 : Explored ? ExploredColor : IdleColor;
             if (p.IsHighContrast && State == HotspotState.Idle) c = Explored ? p.Success : Color.white;
             rend.sharedMaterial = HardwareModelFactory.MaterialFor(c);
-            string text = ShortLabel(Data.label) + (Explored && State != HotspotState.Selected ? " · dilihat" : "");
+            string text = ShortLabel(Data.Label) + (Explored && State != HotspotState.Selected ? Core.Loc.T(" · dilihat", " · seen") : "");
             label.SetContent(text, State == HotspotState.Selected);
             transform.localScale = Vector3.one * baseScale * (State == HotspotState.Selected ? 1.35f : 1f);
         }

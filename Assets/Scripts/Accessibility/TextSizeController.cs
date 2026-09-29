@@ -29,10 +29,10 @@ namespace ComputerExplorer.Accessibility
 
         public static string DisplayName(TextSizeLevel level) => level switch
         {
-            TextSizeLevel.Small => "Kecil",
-            TextSizeLevel.Medium => "Sedang",
-            TextSizeLevel.Large => "Besar",
-            TextSizeLevel.ExtraLarge => "Sangat Besar",
+            TextSizeLevel.Small => Core.Loc.T("Kecil", "Small"),
+            TextSizeLevel.Medium => Core.Loc.T("Sedang", "Medium"),
+            TextSizeLevel.Large => Core.Loc.T("Besar", "Large"),
+            TextSizeLevel.ExtraLarge => Core.Loc.T("Sangat Besar", "Extra Large"),
             _ => level.ToString()
         };
 

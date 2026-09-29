@@ -37,7 +37,7 @@ namespace ComputerExplorer.UI
             public string PrimaryIcon;
             public Action OnPrimary;
             public ButtonVariant PrimaryVariant = ButtonVariant.Primary;
-            public string SecondaryLabel = "Tutup";
+            public string SecondaryLabel = Loc.T("Tutup", "Close");
             public Action OnSecondary;
             public bool Dismissible = true;
             public Action OnClosed;
@@ -86,7 +86,7 @@ namespace ComputerExplorer.UI
             var header = UIKit.HStack(col, DesignTokens.Dp(12), DesignTokens.Space3, 0);
             if (!string.IsNullOrEmpty(o.Icon)) UIKit.Icon(header, o.Icon, DesignTokens.IconSize, o.IconTone);
             UIKit.Flex(UIKit.Label(header, o.Title, TextStyle.Title));
-            if (o.Dismissible) UIKit.IconButton(header, Icons.Close, "Tutup", () => Close(go));
+            if (o.Dismissible) UIKit.IconButton(header, Icons.Close, Loc.T("Tutup", "Close"), () => Close(go));
 
             // Body (scrolls when long)
             if (!string.IsNullOrEmpty(o.Body) || o.BuildContent != null)
@@ -137,11 +137,11 @@ namespace ComputerExplorer.UI
             {
                 Title = title, Body = body, Icon = icon, IconTone = destructive ? ColorRole.Error : ColorRole.Primary,
                 PrimaryLabel = confirmLabel, OnPrimary = onConfirm,
-                PrimaryVariant = destructive ? ButtonVariant.Danger : ButtonVariant.Primary, SecondaryLabel = "Batal"
+                PrimaryVariant = destructive ? ButtonVariant.Danger : ButtonVariant.Primary, SecondaryLabel = Loc.T("Batal", "Cancel")
             });
 
         public GameObject Error(string title, string body) =>
-            Show(new Options { Title = title, Body = body, Icon = Icons.Alert, IconTone = ColorRole.Error, SecondaryLabel = "Mengerti" });
+            Show(new Options { Title = title, Body = body, Icon = Icons.Alert, IconTone = ColorRole.Error, SecondaryLabel = Loc.T("Mengerti", "OK") });
 
         public bool CloseTop()
         {

@@ -37,7 +37,7 @@ namespace ComputerExplorer.Core
             {
                 Debug.LogError($"[SceneLoader] Scene '{sceneName}' is not in Build Settings. " +
                                "Run menu: Computer Explorer > Setup Project.");
-                UI.PopupController.Instance?.Toast($"Layar '{sceneName}' belum tersedia.");
+                UI.PopupController.Instance?.Toast(Loc.T($"Layar '{sceneName}' belum tersedia.", $"Screen '{sceneName}' is not available yet."));
                 return;
             }
             StartCoroutine(LoadRoutine(sceneName));

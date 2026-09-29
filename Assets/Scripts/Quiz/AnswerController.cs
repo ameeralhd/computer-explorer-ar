@@ -4,46 +4,53 @@ using ComputerExplorer.Data;
 
 namespace ComputerExplorer.Quiz
 {
-    /// <summary>Holds the learner's in-progress answer for one question, for every question type.</summary>
+    /// <summary>
+    /// Holds the learner's in-progress answer for one question, for every question type. Choices are stored as
+    /// indices / keys rather than display text, so the language can be switched without losing or corrupting
+    /// an answer.
+    /// </summary>
     public class AnswerController
     {
         public QuestionData Question { get; }
-        public string Selected { get; private set; }
+        /// <summary>Selected option index for single-choice types (-1 = none).</summary>
+        public int Selected { get; private set; } = -1;
         public string Text { get; set; } = "";
-        public List<string> Order { get; } = new List<string>();
-        public Dictionary<string, string> Matches { get; } = new Dictionary<string, string>();
+        /// <summary>Ordering: option indices in the order the learner placed them.</summary>
+        public List<int> Order { get; } = new List<int>();
+        /// <summary>Matching: pair index → chosen right key (Indonesian right-hand text).</summary>
+        public Dictionary<int, string> Matches { get; } = new Dictionary<int, string>();
 
-        /// <summary>Options in display order. Ordering items are shuffled (deterministically, so re-renders are stable).</summary>
-        public IReadOnlyList<string> DisplayOptions { get; }
-        /// <summary>Distinct right-hand values for Matching questions.</summary>
+        /// <summary>Option indices in display order (Ordering is shuffled deterministically; others keep authored order).</summary>
+        public IReadOnlyList<int> DisplayOrder { get; }
+        /// <summary>Distinct right-hand keys for Matching questions, shuffled deterministically.</summary>
         public IReadOnlyList<string> MatchChoices { get; }
 
         public AnswerController(QuestionData question)
         {
             Question = question;
-            var options = question.options ?? new List<string>();
-            DisplayOptions = question.questionType == QuestionType.Ordering ? StableShuffle(options, question.questionId) : options;
-            MatchChoices = StableShuffle(question.pairs.Select(p => p.right).Distinct().ToList(), question.questionId + "r");
+            var indices = Enumerable.Range(0, question.options?.Count ?? 0).ToList();
+            DisplayOrder = question.questionType == QuestionType.Ordering ? StableShuffle(indices, question.questionId, true) : indices;
+            MatchChoices = StableShuffle(question.RightKeys, question.questionId + "r", false);
         }
 
-        public void Select(string option) => Selected = option;
+        public void Select(int optionIndex) => Selected = optionIndex;
 
-        public void AppendToOrder(string option)
+        public void AppendToOrder(int optionIndex)
         {
-            if (!Order.Contains(option)) Order.Add(option);
+            if (!Order.Contains(optionIndex)) Order.Add(optionIndex);
         }
 
-        public void RemoveFromOrder(string option)
+        public void RemoveFromOrder(int optionIndex)
         {
-            int i = Order.IndexOf(option);
+            int i = Order.IndexOf(optionIndex);
             if (i >= 0) Order.RemoveRange(i, Order.Count - i);
         }
 
-        public void Match(string left, string right) => Matches[left] = right;
+        public void Match(int pairIndex, string rightKey) => Matches[pairIndex] = rightKey;
 
         public void Clear()
         {
-            Selected = null;
+            Selected = -1;
             Text = "";
             Order.Clear();
             Matches.Clear();
@@ -53,27 +60,28 @@ namespace ComputerExplorer.Quiz
         {
             QuestionType.Identification => !string.IsNullOrWhiteSpace(Text),
             QuestionType.Ordering => Order.Count == Question.options.Count,
-            QuestionType.Matching => Question.pairs.All(p => Matches.ContainsKey(p.left)),
-            _ => Selected != null
+            QuestionType.Matching => Enumerable.Range(0, Question.pairs.Count).All(Matches.ContainsKey),
+            _ => Selected >= 0
         };
 
         public bool Evaluate() => Question.questionType switch
         {
-            QuestionType.Identification => Question.Evaluate(Text),
+            QuestionType.Identification => Question.EvaluateText(Text),
             QuestionType.Ordering => Question.EvaluateOrder(Order),
             QuestionType.Matching => Question.EvaluateMatching(Matches),
-            _ => Question.Evaluate(Selected)
+            _ => Question.EvaluateChoice(Selected)
         };
 
+        /// <summary>Human-readable answer in the current language (for scenario records).</summary>
         public string Summary => Question.questionType switch
         {
             QuestionType.Identification => Text,
-            QuestionType.Ordering => string.Join(" › ", Order),
-            QuestionType.Matching => string.Join("; ", Matches.Select(m => $"{m.Key}={m.Value}")),
-            _ => Selected
+            QuestionType.Ordering => string.Join(" › ", Order.Select(Question.OptionText)),
+            QuestionType.Matching => string.Join("; ", Matches.Select(m => $"{Question.LeftText(m.Key)}={Question.RightText(m.Value)}")),
+            _ => Question.OptionText(Selected)
         };
 
-        private static List<string> StableShuffle(IList<string> items, string seedText)
+        private static List<T> StableShuffle<T>(IList<T> items, string seedText, bool avoidIdentity)
         {
             var list = items.ToList();
             int seed = 17;
@@ -85,7 +93,7 @@ namespace ComputerExplorer.Quiz
                 (list[i], list[j]) = (list[j], list[i]);
             }
             // Never show an ordering task already solved.
-            if (list.Count > 1 && list.SequenceEqual(items)) (list[0], list[1]) = (list[1], list[0]);
+            if (avoidIdentity && list.Count > 1 && list.SequenceEqual(items)) (list[0], list[1]) = (list[1], list[0]);
             return list;
         }
     }

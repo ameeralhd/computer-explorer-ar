@@ -58,6 +58,25 @@ function iconInner(name) {
 
 for (const name of ICONS) render(iconSvg(name), 128, path.join(res, 'Icons', `${name}.png`));
 console.log(`icons: ${ICONS.length}`);
+// Language flags (full colour — not tinted). Indonesia 3:2, United Kingdom for English.
+const flagId = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="100" viewBox="0 0 150 100">
+  <clipPath id="r"><rect width="150" height="100" rx="12"/></clipPath>
+  <g clip-path="url(#r)"><rect width="150" height="50" fill="#CE1126"/><rect y="50" width="150" height="50" fill="#FFFFFF"/></g>
+  <rect x="1.5" y="1.5" width="147" height="97" rx="11" fill="none" stroke="#98A2B3" stroke-width="3"/></svg>`;
+const flagEn = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="100" viewBox="0 0 60 40">
+  <clipPath id="r"><rect width="60" height="40" rx="5"/></clipPath>
+  <clipPath id="t"><path d="M30,20 h30 v20 z v20 h-30 z h-30 v-20 z v-20 h30 z"/></clipPath>
+  <g clip-path="url(#r)">
+    <rect width="60" height="40" fill="#012169"/>
+    <path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="8"/>
+    <path d="M0,0 L60,40 M60,0 L0,40" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/>
+    <path d="M30,0 v40 M0,20 h60" stroke="#FFFFFF" stroke-width="12"/>
+    <path d="M30,0 v40 M0,20 h60" stroke="#C8102E" stroke-width="7"/>
+  </g></svg>`;
+render(flagId, 150, path.join(res, 'Icons', 'flag-id.png'));
+render(flagEn, 150, path.join(res, 'Icons', 'flag-en.png'));
+console.log('flags: 2');
+
 
 // ---------------------------------------------------------------- Brand
 const BLUE = '#1D4ED8', BLUE_DARK = '#1E3A8A', BLUE_SOFT = '#DBE6FE', TEAL = '#0E9384', AMBER = '#F79009';

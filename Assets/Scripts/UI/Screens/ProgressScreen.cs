@@ -13,7 +13,7 @@ namespace ComputerExplorer.UI.Screens
     /// </summary>
     public class ProgressScreen : ScreenBase
     {
-        protected override string Title => "Progres Belajar";
+        protected override string Title => Loc.T("Progres Belajar", "Learning Progress");
 
         protected override string ScreenNarration
         {
@@ -21,11 +21,17 @@ namespace ComputerExplorer.UI.Screens
             {
                 var d = Saved.Data;
                 var (c, a, _) = Saved.OverallQuizScore();
-                return $"Progres belajar. Modul selesai {d.completedModules.Count} dari {Content.Modules.Count}. " +
-                       $"Aktivitas AR {d.completedARActivities.Count} dari {Content.ARHardware.Count()}. " +
-                       $"Skenario {d.completedScenarios.Count} dari {Content.Scenarios.Count}. " +
-                       (a > 0 ? $"Latihan: {c} dari {a} jawaban benar. " : "Belum ada latihan. ") +
-                       $"Refleksi: {d.reflections.Count}.";
+                return Loc.T(
+                    $"Progres belajar. Modul selesai {d.completedModules.Count} dari {Content.Modules.Count}. " +
+                    $"Aktivitas AR {d.completedARActivities.Count} dari {Content.ARHardware.Count()}. " +
+                    $"Skenario {d.completedScenarios.Count} dari {Content.Scenarios.Count}. " +
+                    (a > 0 ? $"Latihan: {c} dari {a} jawaban benar. " : "Belum ada latihan. ") +
+                    $"Refleksi: {d.reflections.Count}.",
+                    $"Learning progress. Modules completed {d.completedModules.Count} of {Content.Modules.Count}. " +
+                    $"AR activities {d.completedARActivities.Count} of {Content.ARHardware.Count()}. " +
+                    $"Scenarios {d.completedScenarios.Count} of {Content.Scenarios.Count}. " +
+                    (a > 0 ? $"Practice: {c} of {a} answers correct. " : "No practice yet. ") +
+                    $"Reflections: {d.reflections.Count}.");
             }
         }
 
@@ -44,8 +50,8 @@ namespace ComputerExplorer.UI.Screens
             if (!string.IsNullOrEmpty(celebrate))
             {
                 var m = Content.GetModule(celebrate);
-                UIKit.Callout(content, Icons.Trophy, "Modul selesai!",
-                    m != null ? $"Selamat, kamu menyelesaikan Modul {m.order}: {m.title}." : "Selamat!", ColorRole.Success, ColorRole.SuccessSoft);
+                UIKit.Callout(content, Icons.Trophy, Loc.T("Modul selesai!", "Module complete!"),
+                    m != null ? Loc.T($"Selamat, kamu menyelesaikan Modul {m.order}: {m.Title}.", $"Congratulations, you finished Module {m.order}: {m.Title}.") : Loc.T("Selamat!", "Congratulations!"), ColorRole.Success, ColorRole.SuccessSoft);
             }
 
             // Summary tiles
@@ -53,10 +59,10 @@ namespace ComputerExplorer.UI.Screens
             int arTotal = Content.ARHardware.Count();
             var tiles = new (string label, string value, float v, string icon)[]
             {
-                ("Modul selesai", $"{d.completedModules.Count}/{Content.Modules.Count}", Ratio(d.completedModules.Count, Content.Modules.Count), Icons.Book),
-                ("Aktivitas AR", $"{d.completedARActivities.Count}/{arTotal}", Ratio(d.completedARActivities.Count, arTotal), Icons.Scan),
-                ("Skenario", $"{d.completedScenarios.Count}/{Content.Scenarios.Count}", Ratio(d.completedScenarios.Count, Content.Scenarios.Count), Icons.Globe),
-                ("Latihan benar", qa == 0 ? "–" : $"{Mathf.RoundToInt(100f * qc / qa)}%", Ratio(qc, Mathf.Max(1, qt)), Icons.Pencil),
+                (Loc.T("Modul selesai", "Modules done"), $"{d.completedModules.Count}/{Content.Modules.Count}", Ratio(d.completedModules.Count, Content.Modules.Count), Icons.Book),
+                (Loc.T("Aktivitas AR", "AR activities"), $"{d.completedARActivities.Count}/{arTotal}", Ratio(d.completedARActivities.Count, arTotal), Icons.Scan),
+                (Loc.T("Skenario", "Scenarios"), $"{d.completedScenarios.Count}/{Content.Scenarios.Count}", Ratio(d.completedScenarios.Count, Content.Scenarios.Count), Icons.Globe),
+                (Loc.T("Latihan benar", "Practice correct"), qa == 0 ? "–" : $"{Mathf.RoundToInt(100f * qc / qa)}%", Ratio(qc, Mathf.Max(1, qt)), Icons.Pencil),
             };
             int perRow = TextSizeController.IsLarge ? 1 : 2;
             RectTransform row = null;
@@ -77,45 +83,45 @@ namespace ComputerExplorer.UI.Screens
             var r1 = UIKit.HStack(info, DesignTokens.Dp(12));
             UIKit.Icon(r1, d.ReflectionCompleted ? Icons.CheckCircle : Icons.Message, DesignTokens.IconSize,
                 d.ReflectionCompleted ? ColorRole.Success : ColorRole.TextSecondary);
-            UIKit.Flex(UIKit.Label(r1, d.ReflectionCompleted ? $"Refleksi ditulis: {d.reflections.Count}" : "Belum ada refleksi", TextStyle.BodyStrong));
+            UIKit.Flex(UIKit.Label(r1, d.ReflectionCompleted ? Loc.T("Refleksi ditulis", "Reflections written") + $": {d.reflections.Count}" : Loc.T("Belum ada refleksi", "No reflections yet"), TextStyle.BodyStrong));
             UIKit.Divider(info);
             var last = Content.GetModule(d.lastAccessedModule);
             var r2 = UIKit.HStack(info, DesignTokens.Dp(12));
             UIKit.Icon(r2, Icons.Clock, DesignTokens.IconSize, ColorRole.TextSecondary);
             var lc = UIKit.Flex(UIKit.VStack(r2, DesignTokens.Dp(2)));
-            UIKit.Label(lc, "Terakhir diakses", TextStyle.Label, ColorRole.TextSecondary);
-            UIKit.Label(lc, last != null ? $"Modul {last.order}: {last.title}" : "Belum ada", TextStyle.BodyStrong);
+            UIKit.Label(lc, Loc.T("Terakhir diakses", "Last accessed"), TextStyle.Label, ColorRole.TextSecondary);
+            UIKit.Label(lc, last != null ? $"{Loc.T("Modul", "Module")} {last.order}: {last.Title}" : Loc.T("Belum ada", "None yet"), TextStyle.BodyStrong);
             if (!string.IsNullOrEmpty(d.lastAccessedTime)) UIKit.Label(lc, d.lastAccessedTime, TextStyle.Caption, ColorRole.TextSecondary);
             if (last != null && Saved.StateOf(last) != ModuleState.Completed)
-                UIKit.Button(info, "Lanjutkan modul ini", () =>
+                UIKit.Button(info, Loc.T("Lanjutkan modul ini", "Continue this module"), () =>
                 {
                     Learning.Modules.Select(last);
                     Go(AppConstants.Scenes.ModuleDetail);
                 }, ButtonVariant.Primary, Icons.Play);
 
             // Per module
-            UIKit.SectionHeader(content, "Per modul");
+            UIKit.SectionHeader(content, Loc.T("Per modul", "By module"));
             foreach (var m in Content.Modules)
             {
                 var card = UIKit.Card(content, spacing: DesignTokens.Dp(8));
                 var head = UIKit.HStack(card, DesignTokens.Space1);
-                UIKit.Flex(UIKit.Label(head, $"Modul {m.order}: {m.title}", TextStyle.BodyStrong));
+                UIKit.Flex(UIKit.Label(head, $"{Loc.T("Modul", "Module")} {m.order}: {m.Title}", TextStyle.BodyStrong));
                 var st = LearningModulesScreen.StateStyle(Saved.StateOf(m));
                 UIKit.Badge(card, st.text, st.bg, P.Get(st.fg), st.icon);
-                UIKit.ProgressRow(card, "Langkah", $"{Saved.CompletedStepCount(m)}/{m.lessonSteps.Count}", Saved.ModuleProgress01(m));
+                UIKit.ProgressRow(card, Loc.T("Langkah", "Steps"), $"{Saved.CompletedStepCount(m)}/{m.lessonSteps.Count}", Saved.ModuleProgress01(m));
                 var (c, a, total) = Saved.QuizScore(m);
-                UIKit.ProgressRow(card, "Latihan", a == 0 ? "belum dikerjakan" : $"{c}/{total} benar", Ratio(c, total), P.Success);
+                UIKit.ProgressRow(card, Loc.T("Latihan", "Practice"), a == 0 ? Loc.T("belum dikerjakan", "not started") : $"{c}/{total} " + Loc.T("benar", "correct"), Ratio(c, total), P.Success);
             }
 
             UIKit.Spacer(content, DesignTokens.Space2);
-            UIKit.Button(content, "Hapus semua progres", () => ModalController.Instance.Confirm("Hapus semua progres?",
-                "Semua modul, skor latihan, dan refleksi akan dihapus dari perangkat ini. Tindakan ini tidak dapat dibatalkan.",
-                "Hapus", () =>
+            UIKit.Button(content, Loc.T("Hapus semua progres", "Delete all progress"), () => ModalController.Instance.Confirm(Loc.T("Hapus semua progres?", "Delete all progress?"),
+                Loc.T("Semua modul, skor latihan, dan refleksi akan dihapus dari perangkat ini. Tindakan ini tidak dapat dibatalkan.", "All modules, practice scores and reflections will be deleted from this device. This cannot be undone."),
+                Loc.T("Hapus", "Delete"), () =>
                 {
                     Saved.ResetAll();
                     Learning.Lesson.Exit();
                     Quiz.QuizManager.End();
-                    PopupController.Instance.Toast("Progres dihapus", Icons.Info);
+                    PopupController.Instance.Toast(Loc.T("Progres dihapus", "Progress deleted"), Icons.Info);
                     RenderFromTop();
                 }, Icons.Alert, destructive: true), ButtonVariant.Ghost, Icons.Close, compact: true);
         }
@@ -124,7 +130,7 @@ namespace ComputerExplorer.UI.Screens
 
         protected override void BuildFooter(RectTransform footer)
         {
-            UIKit.Button(footer, "Kembali ke menu utama", Nav.Home, ButtonVariant.Primary, Icons.Home);
+            UIKit.Button(footer, Loc.T("Kembali ke menu utama", "Back to main menu"), Nav.Home, ButtonVariant.Primary, Icons.Home);
         }
     }
 }

@@ -3,14 +3,18 @@
 **An inclusive, contextual augmented-reality app for learning computer hardware and computer architecture.**
 Built with Unity and Vuforia Engine. It follows the *Inclusive & Contextual AR Learning Application — Developer Blueprint*.
 
+**Bilingual: Bahasa Indonesia and English.** Tap a flag to switch the whole app, including every lesson,
+question and the narration voice.
+
 Students scan printed cards to explore 3D models of the CPU, RAM, storage, input/output devices and the Von Neumann
-architecture. They listen to Bahasa Indonesia narration, work through real-life scenarios, answer practice
+architecture. They listen to narration, work through real-life scenarios, answer practice
 questions, write reflections and follow their progress. Accessibility settings are global, persistent and testable
 on every screen.
 
 <p align="center">
   <img src="Docs/design/screens/01_welcome.png" width="200">
-  <img src="Docs/design/screens/02_main_menu.png" width="200">
+  <img src="Docs/design/screens/02_main_menu_bahasa_indonesia.png" width="200">
+  <img src="Docs/design/screens/02_main_menu_english.png" width="200">
   <img src="Docs/design/screens/05_ar_scanner_target_terdeteksi.png" width="200">
   <img src="Docs/design/screens/07_von_neumann.png" width="200">
 </p>
@@ -30,14 +34,15 @@ on every screen.
 
 | Area | What is implemented |
 |---|---|
+| **Two languages** | Bahasa Indonesia and English. Choose a language with the flag buttons on the Welcome screen, the Main Menu, the ☰ menu or Settings, or with the flag icon in every screen's header. All UI text, all learning content (modules, hardware, hotspots, scenarios, questions, feedback), the Teacher Guide and the narration voice (TTS `id-ID` / `en-US`) switch instantly. The choice is saved. Answers are stored by position, so switching mid-question never changes a result. |
 | **Navigation** | All 15 scenes from the blueprint. The flow is Splash → Welcome → Main Menu → Modules → Module Detail → guided lesson steps. Back history and the Android back button are supported. |
 | **Vertical slice (§17)** | Module 1: Von Neumann diagram → AR scan of the CPU → hotspots (ALU, Control Unit, registers) → narration → contextual scenario → practice → feedback → reflection → progress. |
 | **AR (§7)** | Vuforia Image Targets created at runtime from PNGs, so no Target Manager upload is needed. Nine targets. Procedural 3D models with tappable hotspots and an animated Von Neumann data flow. Rotate and zoom controls. Tracking states: searching, detected, lost and error, with recovery help. |
 | **Simulation Mode** | The AR scanner also runs without a camera or Vuforia: a virtual card on a desk. Use it in the Editor, on devices without AR support, or when the camera is refused. |
-| **Content (§8)** | `HardwareData`, `ModuleData`, `QuestionData` and `ScenarioData` ScriptableObjects: 4 modules, 9 hardware items, 5 scenarios and 17 questions, all in Bahasa Indonesia. |
+| **Content (§8)** | `HardwareData`, `ModuleData`, `QuestionData` and `ScenarioData` ScriptableObjects: 4 modules, 9 hardware items, 5 scenarios and 17 questions. Every text field has an English twin (`…En`). |
 | **Practice (§12)** | Multiple choice, true/false, matching, identification (typed answer), ordering, contextual scenario and AR identification. Every question has an explanation. |
 | **Accessibility (§9)** | 4 text sizes with reflowing layouts, a High Contrast palette, narration on/off with volume, auto-read, reduced motion, guided/standard mode and large touch targets. State is never shown by colour alone. |
-| **Audio (§10)** | Narration play/pause/replay from recorded clips, with Android Text-to-Speech (`id-ID`) as fallback. Background music ducks while speech plays. UI and feedback sounds are synthesised. |
+| **Audio (§10)** | Narration play/pause/replay from recorded clips (separate Indonesian/English clip fields), with Android Text-to-Speech (`id-ID` or `en-US`) as fallback. Background music ducks while speech plays. UI and feedback sounds are synthesised. |
 | **Progress (§13)** | Local JSON save (atomic writes) for modules, lesson steps, AR activities, hotspots, scenarios, quiz results, reflections and last accessed module. |
 | **Teacher Guide** | Objectives, a 2 × 40 min lesson plan, preparation, target usage, observation points, inclusive-support tips, the UDL/CTL/Mayer/ADDIE mapping, and an "unlock all modules" switch. |
 
@@ -72,7 +77,7 @@ tick **Use Device Database** on the `ARSessionController` in `05_ARScanner` and 
 ### Android build
 
 *File → Build Profiles → Android → Switch Platform → Build*. Test on a physical device (see `Docs/TESTING.md`).
-For narration, install the **Bahasa Indonesia** voice in Android *Settings → Accessibility → Text-to-speech output*.
+For narration, install the **Indonesian** and/or **English** voice in Android *Settings → Accessibility → Text-to-speech output*.
 
 ## Project structure
 

@@ -19,9 +19,13 @@ const I = (name, cls = '') => {
 };
 
 // ------------------------------------------------------------------ building blocks
-const header = (title, { back = true, hc = false } = {}) => `
+const flag = (lang, h = 16) => `<img class="flag" style="height:${h}px" src="${img(`Icons/flag-${lang}.png`)}" alt="${lang === 'en' ? 'English' : 'Bahasa Indonesia'}">`;
+const header = (title, { back = true, lang = 'id' } = {}) => `
   <div class="hdr">${back ? `<button class="ib">${I('arrow-left')}</button>` : `<button class="ib">${I('menu')}</button>`}
-    <div class="hdr-t">${title}</div><button class="ib">${I('volume-2')}</button><button class="ib">${I('settings')}</button></div>`;
+    <div class="hdr-t">${title}</div><button class="ib">${I('volume-2')}</button><button class="ib">${flag(lang, 18)}</button><button class="ib">${I('settings')}</button></div>`;
+const langSwitch = (lang = 'id') => `<div class="grid c2 lang">
+  <button class="btn langopt ${lang === 'id' ? 'sel' : ''}">${flag('id')}<span>Bahasa Indonesia</span>${lang === 'id' ? I('circle-check') : ''}</button>
+  <button class="btn langopt ${lang === 'en' ? 'sel' : ''}">${flag('en')}<span>English</span>${lang === 'en' ? I('circle-check') : ''}</button></div>`;
 const tile = (icon, color, size = 48) => `<div class="tile" style="--c:${color};width:${size}px;height:${size}px">${I(icon)}</div>`;
 const btn = (label, { v = 'primary', icon = null, right = false, compact = false, state = '' } = {}) =>
   `<button class="btn ${v} ${compact ? 'compact' : ''} ${state}">${icon && !right ? I(icon) : ''}<span>${label}</span>${icon && right ? I(icon) : ''}</button>`;
@@ -36,37 +40,50 @@ const CAT = { proc: '#1D4ED8', mem: '#6941C6', sto: '#B54708', inp: '#0E7C86', o
 // ------------------------------------------------------------------ screens
 const welcome = phone('01 Welcome', `
   <div class="scroll">
-    <div class="row between">${badge('Bahasa Indonesia · Narasi aktif', 'soft', 'volume-2')}<button class="ib tonal">${I('accessibility')}</button></div>
-    <img class="mascot" src="${img('Images/mascot.png')}" alt="">
+    <div class="row between">${badge('Narasi aktif', 'soft', 'volume-2')}<button class="ib tonal">${I('accessibility')}</button></div>
+    <div class="card gap8"><div class="row">${I('globe', 'pri')}<p class="strong">Pilih bahasa / Choose language</p></div>${langSwitch('id')}</div>
+    <img class="mascot" style="width:150px" src="${img('Images/mascot.png')}" alt="">
     <p class="label center pri">Halo, aku Robi!</p>
     <h1 class="display center">Computer Explorer</h1>
-    <p class="body center sec">Belajar perangkat keras dan arsitektur komputer dengan model 3D augmented reality, narasi Bahasa Indonesia, dan situasi nyata sehari-hari.</p>
+    <p class="body center sec">Belajar perangkat keras dan arsitektur komputer dengan model 3D augmented reality, narasi, dan situasi nyata sehari-hari.</p>
     <div class="card gap12">
       ${[['scan', 'Jelajahi hardware 3D dalam AR', 'Pindai kartu target untuk melihat CPU, RAM, dan lainnya.'],
-         ['volume-2', 'Dengarkan penjelasan', 'Setiap materi bisa dibacakan dalam Bahasa Indonesia.'],
-         ['accessibility', 'Atur sesuai kebutuhanmu', 'Ukuran teks, kontras tinggi, dan gerakan minimal.']]
+         ['volume-2', 'Dengarkan penjelasan', 'Setiap materi bisa dibacakan dalam Bahasa Indonesia atau English.']]
         .map(([i, t, d]) => `<div class="row top">${tile(i, 'var(--primary-soft)', 40).replace('class="tile"', 'class="tile soft"')}<div><p class="strong">${t}</p><p class="caption sec">${d}</p></div></div>`).join('')}
     </div>
   </div>
   <div class="footer">${btn('Mulai Belajar', { icon: 'arrow-right', right: true })}</div>`);
 
-const menuBody = (cols = 2) => `
-  ${header('Computer Explorer', { back: false })}
+const MENU_TEXT = {
+  id: { hello: 'Halo!', sub: 'Mari belajar tentang perangkat komputer.', tip: 'Petunjuk', tipBody: 'Mulailah dari "Mulai Belajar". Modul 1 membimbingmu langkah demi langkah.',
+        cont: 'Lanjutkan pelajaran', mod: 'Arsitektur Von Neumann &amp; CPU', step: 'Langkah 2 dari 5 · Eksplorasi AR', go: 'Lanjutkan', choose: 'Pilih aktivitas',
+        cards: [['book-open', 'Mulai Belajar', '1/4 modul selesai', CAT.proc], ['scan', 'AR Explorer', 'Pindai kartu target', CAT.inp],
+                ['monitor', 'Hardware', '9 perangkat', CAT.out], ['globe', 'Konteks', 'Situasi nyata', CAT.sto],
+                ['pencil-line', 'Latihan', 'Uji pemahaman', CAT.mem], ['chart-column', 'Progres', 'Skor latihan 75%', CAT.arch]],
+        help: 'Bantuan', teacher: 'Panduan Guru' },
+  en: { hello: 'Hello!', sub: "Let's learn about computer hardware.", tip: 'Tip', tipBody: 'Begin with "Start Learning". Module 1 guides you step by step.',
+        cont: 'Continue lesson', mod: 'Von Neumann Architecture &amp; the CPU', step: 'Step 2 of 5 · AR Exploration', go: 'Continue', choose: 'Choose an activity',
+        cards: [['book-open', 'Start Learning', '1/4 modules done', CAT.proc], ['scan', 'AR Explorer', 'Scan target cards', CAT.inp],
+                ['monitor', 'Hardware', '9 devices', CAT.out], ['globe', 'Context', 'Real-life situations', CAT.sto],
+                ['pencil-line', 'Practice', 'Test your understanding', CAT.mem], ['chart-column', 'Progress', 'Practice score 75%', CAT.arch]],
+        help: 'Help', teacher: 'Teacher Guide' },
+};
+const menuBody = (cols = 2, lang = 'id') => { const t = MENU_TEXT[lang]; return `
+  ${header('Computer Explorer', { back: false, lang })}
   <div class="scroll">
-    <div class="row"><div class="grow"><h1 class="display">Halo!</h1><p class="body sec">Mari belajar tentang perangkat komputer.</p></div><img src="${img('Images/mascot.png')}" style="width:88px" alt=""></div>
-    <div class="callout info"><div class="row top">${I('lightbulb', 'info')}<div><p class="strong">Petunjuk</p><p class="body">Mulailah dari "Mulai Belajar". Modul 1 membimbingmu langkah demi langkah.</p></div></div></div>
-    <div class="card prim-soft"><p class="overline">Lanjutkan pelajaran</p><p class="heading">Arsitektur Von Neumann &amp; CPU</p><p class="body">Langkah 2 dari 5 · Eksplorasi AR</p>${bar(0.2)}${btn('Lanjutkan', { icon: 'play' })}</div>
-    <h3 class="heading">Pilih aktivitas</h3>
+    <div class="row"><div class="grow"><h1 class="display">${t.hello}</h1><p class="body sec">${t.sub}</p></div><img src="${img('Images/mascot.png')}" style="width:88px" alt=""></div>
+    ${langSwitch(lang)}
+    <div class="callout info"><div class="row top">${I('lightbulb', 'info')}<div><p class="strong">${t.tip}</p><p class="body">${t.tipBody}</p></div></div></div>
+    <div class="card prim-soft"><p class="overline">${t.cont}</p><p class="heading">${t.mod}</p><p class="body">${t.step}</p>${bar(0.2)}${btn(t.go, { icon: 'play' })}</div>
+    <h3 class="heading">${t.choose}</h3>
     <div class="grid c${cols}">
-      ${[['book-open', 'Mulai Belajar', '1/4 modul selesai', CAT.proc], ['scan', 'AR Explorer', 'Pindai kartu target', CAT.inp],
-         ['monitor', 'Hardware', '9 perangkat', CAT.out], ['globe', 'Konteks', 'Situasi nyata', CAT.sto],
-         ['pencil-line', 'Latihan', 'Uji pemahaman', CAT.mem], ['chart-column', 'Progres', 'Skor latihan 75%', CAT.arch]]
-        .map(([i, t, c, col]) => `<div class="card tap gap12">${tile(i, col)}<p class="heading">${t}</p><p class="caption sec">${c}</p></div>`).join('')}
+      ${t.cards.map(([i, ti, c, col]) => `<div class="card tap gap12">${tile(i, col)}<p class="heading">${ti}</p><p class="caption sec">${c}</p></div>`).join('')}
     </div>
-    <div class="grid c2">${btn('Bantuan', { v: 'secondary', icon: 'circle-help', compact: true })}${btn('Panduan Guru', { v: 'secondary', icon: 'graduation-cap', compact: true })}</div>
-  </div>`;
+    <div class="grid c2">${btn(t.help, { v: 'secondary', icon: 'circle-help', compact: true })}${btn(t.teacher, { v: 'secondary', icon: 'graduation-cap', compact: true })}</div>
+  </div>`; };
 const menu = phone('02 Main Menu', menuBody());
 const menuHC = phone('02 Main Menu — Kontras Tinggi', menuBody(), { cls: 'hc', note: 'Latar hitam, teks putih, aksi kuning; semua permukaan bergaris tepi 2dp.' });
+const menuEN = phone('02 Main Menu — English', menuBody(2, 'en'), { note: 'Same screen after tapping the English flag: every label, lesson and narration switches instantly.' });
 const menuXL = phone('02 Main Menu — Teks Sangat Besar', menuBody(1), { cls: 'xl', note: 'Teks ×1.5; grid 2 kolom berubah menjadi 1 kolom, tidak ada teks terpotong.' });
 
 const modules = phone('03 Learning Modules', `
@@ -242,6 +259,10 @@ display:flex;flex-direction:column;font-size:calc(16px*var(--ts));box-shadow:0 2
 .ib{width:var(--touch);height:var(--touch);border:0;background:none;color:var(--primary);display:grid;place-items:center;border-radius:12px;flex:none}
 .ib.tonal{background:var(--primary-soft);color:var(--on-primary-soft);border:var(--bw) solid transparent}
 .hc .ib.tonal{border-color:var(--primary)}
+.flag{width:auto;border-radius:3px;display:block}.hdr .ib .flag{height:18px}
+.btn.langopt{background:var(--surface);color:var(--text);border:var(--bw) solid var(--border-strong);font-size:calc(14px*var(--ts));padding:6px 10px;min-height:var(--touch)}
+.btn.langopt.sel{background:var(--primary-soft);color:var(--on-primary-soft);border:2px solid var(--primary)}
+.grid.lang{gap:8px}
 .scroll{flex:1;overflow:hidden;padding:24px 24px 24px;display:flex;flex-direction:column;gap:16px}
 .footer{flex:none;background:var(--surface);border-top:var(--bw) solid var(--border);padding:16px 24px;display:flex;flex-direction:column;gap:8px}
 .display{font-size:calc(28px*var(--ts));font-weight:700;line-height:1.1}.title{font-size:calc(22px*var(--ts));font-weight:700;line-height:1.15}
@@ -353,9 +374,9 @@ ${badge('Terkunci', 'muted', 'lock')}${badge('Tersedia', 'pri', 'play')}${badge(
 <h2>5 · Screens (phone, 360 × 780 dp)</h2>
 <div class="phones">${welcome}${menu}${modules}${detail}${arSearch}${ar}${vn}${scenario}${practice}${progress}${a11y}</div>
 
-<h2>6 · Accessibility variants of the same screen</h2>
+<h2>6 · Language &amp; accessibility variants of the same screen</h2>
 <p class="lead">The same Main Menu under the learner's settings — nothing is redesigned per mode; the tokens change and the layout reflows.</p>
-<div class="phones">${menu.replace('02 Main Menu', '02 Main Menu — Standar')}${menuHC}${menuXL}</div>
+<div class="phones">${menu.replace('02 Main Menu', '02 Main Menu — Bahasa Indonesia')}${menuEN}${menuHC}${menuXL}</div>
 </div>
 <svg width="0" height="0" style="position:absolute"><defs>
 ${[...used].map(n => {

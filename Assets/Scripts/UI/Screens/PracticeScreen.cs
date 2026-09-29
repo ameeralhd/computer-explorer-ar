@@ -12,7 +12,7 @@ namespace ComputerExplorer.UI.Screens
     /// </summary>
     public class PracticeScreen : ScreenBase
     {
-        protected override string Title => "Latihan";
+        protected override string Title => Loc.T("Latihan", "Practice");
         protected override LessonStepType? LessonStep => LessonStepType.Practice;
 
         protected override string ScreenNarration
@@ -20,13 +20,12 @@ namespace ComputerExplorer.UI.Screens
             get
             {
                 var q = Quiz?.Current;
-                if (q == null) return "Latihan selesai.";
-                string options = q.questionType.IsSingleChoice() ? " Pilihan: " + string.Join(", ", q.options) + "." : "";
-                return q.questionText + options;
+                if (q == null) return Loc.T("Latihan selesai.", "Practice complete.");
+                return QuestionController.SpokenText(q);
             }
         }
 
-        protected override string GuidanceText => "Pilih jawaban, lalu tekan \"Periksa jawaban\". Penjelasan akan muncul setelahnya.";
+        protected override string GuidanceText => Loc.T("Pilih jawaban, lalu tekan \"Periksa jawaban\". Penjelasan akan muncul setelahnya.", "Choose an answer, then press \"Check answer\". The explanation appears afterwards.");
 
         private static QuizManager Quiz => QuizManager.Active;
         private ModuleData module;
@@ -52,7 +51,7 @@ namespace ComputerExplorer.UI.Screens
             if (Learning.IsLessonStep(LessonStepType.Practice)) return; // lesson bar already shows the module
             var box = UIKit.Box(area, P.Surface, 0, null, "ModulePicker");
             UIKit.AddVertical(box, DesignTokens.Space1, DesignTokens.ScreenMargin, DesignTokens.Dp(12));
-            UIKit.Label(box, "Pilih modul", TextStyle.Overline, ColorRole.TextSecondary);
+            UIKit.Label(box, Loc.T("Pilih modul", "Choose module"), TextStyle.Overline, ColorRole.TextSecondary);
             int perRow = TextSizeController.IsLarge ? 2 : 4;
             RectTransform row = null;
             var mods = Content.Modules;
@@ -60,7 +59,7 @@ namespace ComputerExplorer.UI.Screens
             {
                 if (i % perRow == 0) row = UIKit.EqualRow(box, DesignTokens.Space1);
                 var m = mods[i];
-                UIKit.Layout(UIKit.Chip(row, $"Modul {m.order}", m == module, () =>
+                UIKit.Layout(UIKit.Chip(row, Loc.T("Modul", "Module") + $" {m.order}", m == module, () =>
                 {
                     QuizManager.Start(m);
                     StartOrResume(m);
@@ -74,7 +73,7 @@ namespace ComputerExplorer.UI.Screens
         {
             if (Quiz == null)
             {
-                UIKit.Label(content, "Belum ada soal.", TextStyle.Body);
+                UIKit.Label(content, Loc.T("Belum ada soal.", "No questions yet."), TextStyle.Body);
                 return;
             }
             if (Quiz.Finished)
@@ -83,15 +82,15 @@ namespace ComputerExplorer.UI.Screens
                 return;
             }
 
-            UIKit.ProgressRow(content, module.title, $"Soal {Quiz.Index + 1}/{Quiz.Total}", (float)Quiz.Index / Mathf.Max(1, Quiz.Total));
+            UIKit.ProgressRow(content, module.Title, Loc.T("Soal", "Question") + $" {Quiz.Index + 1}/{Quiz.Total}", (float)Quiz.Index / Mathf.Max(1, Quiz.Total));
 
             var q = Quiz.Current;
             QuestionController.BuildQuestion(content, q, Quiz.Index + 1, Quiz.Total);
-            NarrationControl(content, ScreenNarration, q.audio, "Dengarkan soal");
+            NarrationControl(content, ScreenNarration, q.Clip, Loc.T("Dengarkan soal", "Listen to question"));
 
             if (q.questionType == QuestionType.ARIdentification && q.relatedHardware != null && !Quiz.Submitted)
             {
-                UIKit.Button(content, $"Amati {q.relatedHardware.hardwareName} dalam AR", () =>
+                UIKit.Button(content, Loc.T($"Amati {q.relatedHardware.hardwareName} dalam AR", $"Look at the {q.relatedHardware.hardwareName} in AR"), () =>
                 {
                     State.SelectHardware(q.relatedHardware.hardwareId);
                     State.ARReturnScene = AppConstants.Scenes.Practice;
@@ -104,7 +103,7 @@ namespace ComputerExplorer.UI.Screens
             if (Quiz.Submitted)
             {
                 QuizFeedback.Build(content, q, Quiz.LastCorrect);
-                NarrationControl(content, QuizFeedback.SpokenText(q, Quiz.LastCorrect), null, "Dengarkan penjelasan");
+                NarrationControl(content, QuizFeedback.SpokenText(q, Quiz.LastCorrect), null, Loc.T("Dengarkan penjelasan", "Listen to explanation"));
             }
         }
 
@@ -116,12 +115,12 @@ namespace ComputerExplorer.UI.Screens
             var row = UIKit.HStack(hero, DesignTokens.Dp(12));
             UIKit.Icon(row, pct >= 0.7f ? Icons.Trophy : Icons.Lightbulb, DesignTokens.Dp(40), pct >= 0.7f ? ColorRole.Success : ColorRole.Warning);
             var col = UIKit.Flex(UIKit.VStack(row, DesignTokens.Dp(4)));
-            UIKit.Label(col, "Hasil latihan", TextStyle.Overline, ColorRole.TextSecondary);
-            UIKit.Label(col, $"{Quiz.Score} dari {Quiz.Total} benar ({Mathf.RoundToInt(pct * 100)}%)", TextStyle.Title);
-            UIKit.Label(hero, pct >= 0.7f ? "Hebat! Pemahamanmu sudah baik." : "Tidak apa-apa. Pelajari lagi penjelasannya, lalu coba ulangi.",
+            UIKit.Label(col, Loc.T("Hasil latihan", "Practice results"), TextStyle.Overline, ColorRole.TextSecondary);
+            UIKit.Label(col, Loc.T($"{Quiz.Score} dari {Quiz.Total} benar", $"{Quiz.Score} of {Quiz.Total} correct") + $" ({Mathf.RoundToInt(pct * 100)}%)", TextStyle.Title);
+            UIKit.Label(hero, pct >= 0.7f ? Loc.T("Hebat! Pemahamanmu sudah baik.", "Great! You understand this well.") : Loc.T("Tidak apa-apa. Pelajari lagi penjelasannya, lalu coba ulangi.", "That's okay. Review the explanations, then try again."),
                 TextStyle.Body);
 
-            UIKit.SectionHeader(content, "Rincian");
+            UIKit.SectionHeader(content, Loc.T("Rincian", "Details"));
             var list = UIKit.Card(content, spacing: DesignTokens.Dp(10));
             for (int i = 0; i < Quiz.Results.Count; i++)
             {
@@ -129,8 +128,8 @@ namespace ComputerExplorer.UI.Screens
                 var r = UIKit.HStack(list, DesignTokens.Dp(12), align: TextAnchor.UpperLeft);
                 UIKit.Icon(r, correct ? Icons.CheckCircle : Icons.XCircle, DesignTokens.IconSize, correct ? ColorRole.Success : ColorRole.Error);
                 var t = UIKit.Flex(UIKit.VStack(r, DesignTokens.Dp(2)));
-                UIKit.Label(t, $"Soal {i + 1} · {(correct ? "Benar" : "Belum tepat")}", TextStyle.Label, correct ? ColorRole.Success : ColorRole.Error);
-                UIKit.Label(t, question.questionText, TextStyle.Caption, ColorRole.TextSecondary);
+                UIKit.Label(t, Loc.T("Soal", "Question") + $" {i + 1} · {(correct ? Loc.T("Benar", "Correct") : Loc.T("Belum tepat", "Not quite"))}", TextStyle.Label, correct ? ColorRole.Success : ColorRole.Error);
+                UIKit.Label(t, question.Text, TextStyle.Caption, ColorRole.TextSecondary);
                 if (i < Quiz.Results.Count - 1) UIKit.Divider(list);
             }
         }
@@ -141,17 +140,17 @@ namespace ComputerExplorer.UI.Screens
             if (Quiz.Finished)
             {
                 bool lesson = AddLessonContinue(footer, true);
-                UIKit.Button(footer, "Ulangi latihan", () =>
+                UIKit.Button(footer, Loc.T("Ulangi latihan", "Try again"), () =>
                 {
                     QuizManager.Start(module);
                     RenderFromTop();
                 }, lesson ? ButtonVariant.Secondary : ButtonVariant.Primary, Icons.Refresh);
-                if (!lesson) UIKit.Button(footer, "Kembali ke menu", Nav.Home, ButtonVariant.Secondary, Icons.Home);
+                if (!lesson) UIKit.Button(footer, Loc.T("Kembali ke menu", "Back to menu"), Nav.Home, ButtonVariant.Secondary, Icons.Home);
                 return;
             }
             if (!Quiz.Submitted)
             {
-                UIKit.Button(footer, "Periksa jawaban", () =>
+                UIKit.Button(footer, Loc.T("Periksa jawaban", "Check answer"), () =>
                 {
                     Quiz.Submit();
                     Render();
@@ -160,7 +159,7 @@ namespace ComputerExplorer.UI.Screens
             else
             {
                 bool last = Quiz.Index >= Quiz.Total - 1;
-                UIKit.Button(footer, last ? "Lihat hasil" : "Soal berikutnya", () =>
+                UIKit.Button(footer, last ? Loc.T("Lihat hasil", "See results") : Loc.T("Soal berikutnya", "Next question"), () =>
                 {
                     Quiz.Next();
                     RenderFromTop();

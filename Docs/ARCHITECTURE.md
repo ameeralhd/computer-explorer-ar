@@ -115,6 +115,26 @@ totals.
 Create the asset (*Create → Computer Explorer → …*), fill in the fields, link it from a module, then run
 **Rebuild Content Database**. The question answer format is documented on `QuestionData`.
 
+## Languages (Bahasa Indonesia / English)
+
+- `Core/Loc.cs` provides `Loc.T("Bahasa Indonesia", "English")`. Every UI string is written as a pair at the call site,
+  so neither language can drift. The current language is `AccessibilitySettings.language`, which is persisted. Changing
+  it (`Loc.Set`) raises `AccessibilityManager.Changed`, so every screen re-renders at once. The 3D hotspot labels
+  refresh, running narration stops, and the TTS voice switches (`id-ID` / `en-US`).
+- Content ScriptableObjects hold English in parallel `…En` fields (`fullNameEn`, `functionEn`, `labelEn`,
+  `questionTextEn`, `optionsEn`, `titleEn`, `learningObjectiveEn`, …). Screens read the language-aware properties
+  (`FullName`, `Function`, `Label`, `Text`, `OptionText(i)`, `Title`, `Objectives`, …). An empty English field falls
+  back to Indonesian.
+- Recorded narration: `narration` / `narrationEn` (and `audio` / `audioEn`). A missing clip falls back to TTS in the
+  current language.
+- Quiz answers are stored as option **indices** (`AnswerController`), so the language can change mid-question.
+  Identification accepts answers from both `correctAnswer` and `correctAnswerEn`.
+- UI: `UIKit.LanguageSwitch` shows two flag buttons (Welcome, Main Menu, ☰ menu, Settings), and
+  `UIKit.LanguageToggleButton` is the flag in every screen header.
+
+**Adding a third language:** extend `AppLanguage`, change `Loc.T` to take the new language, and add `…Xx` fields to the
+content classes.
+
 ## Persistence
 
 `SaveSystem` writes JSON to `Application.persistentDataPath` (`progress.json`, `accessibility.json`,

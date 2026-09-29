@@ -10,6 +10,7 @@ namespace ComputerExplorer.Accessibility
     [Serializable]
     public class AccessibilitySettings
     {
+        public Core.AppLanguage language = Core.AppLanguage.Indonesian;
         public TextSizeLevel textSize = TextSizeLevel.Medium;
         public ContrastMode contrast = ContrastMode.Standard;
         public bool narrationEnabled = true;

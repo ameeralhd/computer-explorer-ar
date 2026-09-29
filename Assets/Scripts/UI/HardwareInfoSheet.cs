@@ -28,26 +28,26 @@ namespace ComputerExplorer.UI
                     var head = UIKit.HStack(c, DesignTokens.Dp(12));
                     UIKit.IconTile(head, h.iconName, p.Category(h.category), p.OnCategory, DesignTokens.Dp(56));
                     var t = UIKit.Flex(UIKit.VStack(head, DesignTokens.Dp(2)));
-                    UIKit.Label(t, h.fullName, TextStyle.BodyStrong);
+                    UIKit.Label(t, h.FullName, TextStyle.BodyStrong);
                     UIKit.Label(t, h.category.DisplayName(), TextStyle.Caption, ColorRole.TextSecondary);
 
-                    UIKit.Label(c, h.detailedDescription, TextStyle.Body);
-                    UIKit.Callout(c, Icons.Target, "Fungsi", h.function);
-                    UIKit.Callout(c, Icons.Globe, "Contoh nyata", h.contextualExample, ColorRole.Primary, ColorRole.PrimarySoft);
+                    UIKit.Label(c, h.DetailedDescription, TextStyle.Body);
+                    UIKit.Callout(c, Icons.Target, Loc.T("Fungsi", "Function"), h.Function);
+                    UIKit.Callout(c, Icons.Globe, Loc.T("Contoh nyata", "Real-life example"), h.ContextualExample, ColorRole.Primary, ColorRole.PrimarySoft);
                     if (h.hotspots.Count > 0)
                     {
-                        UIKit.Label(c, "Bagian penting", TextStyle.Heading);
+                        UIKit.Label(c, Loc.T("Bagian penting", "Key parts"), TextStyle.Heading);
                         foreach (var hs in h.hotspots)
                         {
                             var card = UIKit.Card(c, fill: ColorRole.SurfaceAlt, padding: DesignTokens.Dp(12));
-                            UIKit.Label(card, hs.label, TextStyle.BodyStrong);
-                            UIKit.Label(card, hs.description, TextStyle.Body);
+                            UIKit.Label(card, hs.Label, TextStyle.BodyStrong);
+                            UIKit.Label(card, hs.Description, TextStyle.Body);
                         }
                     }
-                    UIKit.Button(c, "Dengarkan penjelasan", () => AudioManager.Instance.Narration.Toggle(h.NarrationText, h.narration),
+                    UIKit.Button(c, Loc.T("Dengarkan penjelasan", "Listen to explanation"), () => AudioManager.Instance.Narration.Toggle(h.NarrationText, h.NarrationClip),
                         ButtonVariant.Tonal, Icons.Volume);
                 },
-                PrimaryLabel = hasAR ? "Lihat dalam AR" : null,
+                PrimaryLabel = hasAR ? Loc.T("Lihat dalam AR", "View in AR") : null,
                 PrimaryIcon = Icons.Scan,
                 OnPrimary = () =>
                 {
@@ -55,7 +55,7 @@ namespace ComputerExplorer.UI
                     GameStateManager.Instance.ARReturnScene = returnScene;
                     NavigationController.Instance.GoTo(AppConstants.Scenes.ARScanner);
                 },
-                SecondaryLabel = "Tutup"
+                SecondaryLabel = Loc.T("Tutup", "Close")
             });
         }
     }

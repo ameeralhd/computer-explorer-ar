@@ -158,7 +158,7 @@ namespace ComputerExplorer.UI
             var row = UIKit.AddHorizontal(bar, DesignTokens.Dp(4), DesignTokens.Space1, DesignTokens.Dp(4));
             row.childAlignment = TextAnchor.MiddleLeft;
 
-            if (ShowBack) UIKit.IconButton(bar, Icons.Back, "Kembali", OnBackPressed);
+            if (ShowBack) UIKit.IconButton(bar, Icons.Back, Loc.T("Kembali", "Back"), OnBackPressed);
             else UIKit.IconButton(bar, Icons.Menu, "Menu", OpenMenuSheet);
 
             var title = UIKit.Label(bar, Title, TextStyle.Heading, ColorRole.TextPrimary, TextAnchor.MiddleLeft);
@@ -168,14 +168,15 @@ namespace ComputerExplorer.UI
             if (!string.IsNullOrEmpty(ScreenNarration))
             {
                 bool speaking = Narration.IsSpeaking && Narration.CurrentText == ScreenNarration;
-                UIKit.IconButton(bar, speaking ? Icons.Pause : Icons.Volume, speaking ? "Jeda narasi" : "Bacakan layar ini",
+                UIKit.IconButton(bar, speaking ? Icons.Pause : Icons.Volume, speaking ? Loc.T("Jeda narasi", "Pause narration") : Loc.T("Bacakan layar ini", "Read this screen aloud"),
                     () =>
                     {
                         Narration.Toggle(ScreenNarration);
                         Render();
                     });
             }
-            UIKit.IconButton(bar, Icons.Settings, "Pengaturan aksesibilitas", () => Nav.GoTo(AppConstants.Scenes.Accessibility));
+            UIKit.LanguageToggleButton(bar);
+            UIKit.IconButton(bar, Icons.Settings, Loc.T("Pengaturan", "Settings"), () => Nav.GoTo(AppConstants.Scenes.Accessibility));
 
             // bottom hairline
             var line = UIKit.Divider(SafeRoot);
@@ -186,9 +187,9 @@ namespace ComputerExplorer.UI
 
         private void BuildGuidance(RectTransform content)
         {
-            var card = UIKit.Callout(content, Icons.Lightbulb, "Petunjuk", GuidanceText);
+            var card = UIKit.Callout(content, Icons.Lightbulb, Loc.T("Petunjuk", "Tip"), GuidanceText);
             var row = UIKit.HStack(card, DesignTokens.Space1);
-            UIKit.Button(row, "Dengarkan petunjuk", () => Narration.Play(GuidanceText, null, true), ButtonVariant.Ghost,
+            UIKit.Button(row, Loc.T("Dengarkan petunjuk", "Listen to tip"), () => Narration.Play(GuidanceText, null, true), ButtonVariant.Ghost,
                 Icons.Volume, compact: true);
         }
 
@@ -203,7 +204,7 @@ namespace ComputerExplorer.UI
             UIKit.Flex(UIKit.Label(row, $"{lesson.StepLabel} · {lesson.CurrentStep.type.DisplayName()}", TextStyle.Label,
                 ColorRole.OnPrimarySoft));
             UIKit.ProgressBar(box, (float)lesson.StepIndex / Mathf.Max(1, m.lessonSteps.Count), P.Primary, 6);
-            UIKit.Label(box, m.title, TextStyle.Caption, ColorRole.OnPrimarySoft);
+            UIKit.Label(box, m.Title, TextStyle.Caption, ColorRole.OnPrimarySoft);
         }
 
         private void StyleFooter(RectTransform footer)
@@ -225,7 +226,7 @@ namespace ComputerExplorer.UI
             bool last = lesson.StepIndex >= lesson.ActiveModule.lessonSteps.Count - 1;
             if (!enabled && !string.IsNullOrEmpty(hint))
                 UIKit.Label(footer, hint, TextStyle.Caption, ColorRole.TextSecondary, TextAnchor.MiddleCenter);
-            UIKit.Button(footer, last ? "Selesaikan modul" : "Lanjut ke langkah berikutnya", Learning.CompleteCurrentStep,
+            UIKit.Button(footer, last ? Loc.T("Selesaikan modul", "Finish module") : Loc.T("Lanjut ke langkah berikutnya", "Continue to next step"), Learning.CompleteCurrentStep,
                 ButtonVariant.Primary, last ? Icons.Trophy : Icons.Forward, enabled ? ButtonState.Normal : ButtonState.Disabled,
                 iconRight: !last);
             return true;
@@ -248,37 +249,40 @@ namespace ComputerExplorer.UI
                             Nav.GoTo(scene);
                         }, ButtonVariant.Tonal, icon);
                     }
-                    Item("Arsitektur Von Neumann", Icons.Workflow, AppConstants.Scenes.VonNeumann);
-                    Item("Aksesibilitas", Icons.Accessibility, AppConstants.Scenes.Accessibility);
-                    Item("Bantuan & Tutorial", Icons.Help, AppConstants.Scenes.Help);
-                    Item("Panduan Guru", Icons.Teacher, AppConstants.Scenes.TeacherGuide);
-                    Item("Tentang Aplikasi", Icons.Info, AppConstants.Scenes.Welcome);
+                    UIKit.Label(c, Loc.T("Bahasa", "Language"), TextStyle.Overline, ColorRole.TextSecondary);
+                    UIKit.LanguageSwitch(c, _ => ModalController.Instance.CloseAll());
+                    Item(Loc.T("Arsitektur Von Neumann", "Von Neumann Architecture"), Icons.Workflow, AppConstants.Scenes.VonNeumann);
+                    Item(Loc.T("Pengaturan & Aksesibilitas", "Settings & Accessibility"), Icons.Accessibility, AppConstants.Scenes.Accessibility);
+                    Item(Loc.T("Bantuan & Tutorial", "Help & Tutorial"), Icons.Help, AppConstants.Scenes.Help);
+                    Item(Loc.T("Panduan Guru", "Teacher Guide"), Icons.Teacher, AppConstants.Scenes.TeacherGuide);
+                    Item(Loc.T("Tentang Aplikasi", "About the App"), Icons.Info, AppConstants.Scenes.Welcome);
                 }
             });
         }
 
         // ------------------------------------------------------------------ helpers for subclasses
         /// <summary>Narration play/pause/replay control bound to a text (Audio Control: off, playing, paused).</summary>
-        protected void NarrationControl(Transform parent, string text, AudioClip clip = null, string label = "Dengarkan")
+        protected void NarrationControl(Transform parent, string text, AudioClip clip = null, string label = null)
         {
+            label ??= Loc.T("Dengarkan", "Listen");
             var row = UIKit.HStack(parent, DesignTokens.Space1, name: "NarrationControl");
             var state = Narration.State;
             bool isThis = Narration.CurrentText == text;
             if (state == NarrationState.Off)
             {
-                UIKit.Button(row, "Narasi nonaktif", () => Nav.GoTo(AppConstants.Scenes.Accessibility), ButtonVariant.Tonal,
+                UIKit.Button(row, Loc.T("Narasi nonaktif", "Narration off"), () => Nav.GoTo(AppConstants.Scenes.Accessibility), ButtonVariant.Tonal,
                     Icons.VolumeOff, compact: true);
                 return;
             }
             bool playing = isThis && state == NarrationState.Playing;
             bool paused = isThis && state == NarrationState.Paused;
-            UIKit.Button(row, playing ? "Jeda" : paused ? "Lanjutkan" : label, () =>
+            UIKit.Button(row, playing ? Loc.T("Jeda", "Pause") : paused ? Loc.T("Lanjutkan", "Resume") : label, () =>
             {
                 Narration.Toggle(text, clip);
                 StartCoroutine(RenderWhenNarrationChanges());
             }, ButtonVariant.Tonal, playing ? Icons.Pause : Icons.Volume, compact: true);
             if (playing || paused)
-                UIKit.IconButton(row, Icons.Reset, "Putar ulang", () =>
+                UIKit.IconButton(row, Icons.Reset, Loc.T("Putar ulang", "Replay"), () =>
                 {
                     Narration.Replay();
                     Render();

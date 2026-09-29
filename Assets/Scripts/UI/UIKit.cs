@@ -286,7 +286,7 @@ namespace ComputerExplorer.UI
 
             if (state == ButtonState.Loading) icon = Icons.Refresh;
             if (state == ButtonState.Completed) icon = Icons.CheckCircle;
-            if (state == ButtonState.Loading) label = "Memuat…";
+            if (state == ButtonState.Loading) label = Core.Loc.T("Memuat…", "Loading…");
 
             Image iconImg = null;
             if (!string.IsNullOrEmpty(icon) && !iconRight) iconImg = Icon(box, icon, DesignTokens.IconSizeSmall, fg);
@@ -350,7 +350,7 @@ namespace ComputerExplorer.UI
             ApplyButtonTint(btn, box.GetComponent<Image>());
             btn.onClick.AddListener(() => onClick?.Invoke());
             root.gameObject.AddComponent<ButtonAudio>();
-            root.gameObject.AddComponent<AccessibleLabel>().label = label + (selected ? " (dipilih)" : "");
+            root.gameObject.AddComponent<AccessibleLabel>().label = label + (selected ? Core.Loc.T(" (dipilih)", " (selected)") : "");
             return btn;
         }
 
@@ -462,10 +462,10 @@ namespace ComputerExplorer.UI
                 ci.color = P.Primary;
                 ci.raycastTarget = false;
             }
-            Label(sw, isOn ? "Aktif" : "Nonaktif", TextStyle.Overline, isOn ? ColorRole.Primary : ColorRole.TextSecondary,
+            Label(sw, isOn ? Core.Loc.T("Aktif", "On") : Core.Loc.T("Nonaktif", "Off"), TextStyle.Overline, isOn ? ColorRole.Primary : ColorRole.TextSecondary,
                 TextAnchor.MiddleCenter);
             var btn = Outer(card).GetComponent<UnityEngine.UI.Button>();
-            Outer(card).gameObject.AddComponent<AccessibleLabel>().label = $"{title}: {(isOn ? "aktif" : "nonaktif")}";
+            Outer(card).gameObject.AddComponent<AccessibleLabel>().label = $"{title}: {(isOn ? Core.Loc.T("aktif", "on") : Core.Loc.T("nonaktif", "off"))}";
             return btn;
         }
 
@@ -573,6 +573,66 @@ namespace ComputerExplorer.UI
             input.onValueChanged.AddListener(v => onChanged(v));
             root.gameObject.AddComponent<AccessibleLabel>().label = placeholder;
             return input;
+        }
+
+        // ------------------------------------------------------------------ language
+        /// <summary>Full-colour flag (not tinted), 3:2.</summary>
+        public static Image Flag(Transform parent, Core.AppLanguage language, float heightDp = 16)
+        {
+            var img = Icon(parent, Core.Loc.FlagIcon(language), DesignTokens.Dp(heightDp), Color.white);
+            float h = DesignTokens.Dp(heightDp), w = h * 1.5f;
+            Layout(img, minWidth: w, preferredWidth: w, minHeight: h, preferredHeight: h);
+            return img;
+        }
+
+        /// <summary>
+        /// Two-option language selector: [flag Bahasa Indonesia] [flag English]. The selected option has a check
+        /// icon and outline (not colour alone). Choosing one switches the whole app instantly and is saved.
+        /// </summary>
+        public static RectTransform LanguageSwitch(Transform parent, Action<Core.AppLanguage> onSelected = null)
+        {
+            var row = TextSizeController.IsLarge ? VStack(parent, DesignTokens.Space1, name: "LanguageSwitch")
+                                                  : EqualRow(parent, DesignTokens.Space1);
+            row.name = "LanguageSwitch";
+            foreach (var lang in new[] { Core.AppLanguage.Indonesian, Core.AppLanguage.English })
+            {
+                bool selected = Core.Loc.Current == lang;
+                var box = Box(row, selected ? P.PrimarySoft : P.Surface, DesignTokens.RadiusButton,
+                    selected ? P.Primary : P.BorderStrong, "Language " + Core.Loc.Code(lang), raycast: true);
+                var root = Outer(box);
+                Layout(root, minHeight: DesignTokens.TouchTarget, preferredHeight: DesignTokens.ButtonHeight, flexibleWidth: 1);
+                AddHorizontal(box, DesignTokens.Space1, DesignTokens.Dp(12), DesignTokens.Dp(8), TextAnchor.MiddleCenter);
+                Flag(box, lang, 16);
+                LabelColored(box, Core.Loc.NativeName(lang), TextStyle.Label, selected ? P.OnPrimarySoft : P.TextPrimary, TextAnchor.MiddleCenter);
+                if (selected) Icon(box, Icons.CheckCircle, DesignTokens.IconSizeSmall, P.OnPrimarySoft);
+                var btn = root.gameObject.AddComponent<UnityEngine.UI.Button>();
+                ApplyButtonTint(btn, box.GetComponent<Image>());
+                var chosen = lang;
+                btn.onClick.AddListener(() =>
+                {
+                    Core.Loc.Set(chosen);
+                    onSelected?.Invoke(chosen);
+                });
+                root.gameObject.AddComponent<ButtonAudio>();
+                root.gameObject.AddComponent<AccessibleLabel>().label = Core.Loc.NativeName(lang) + (selected ? " ✓" : "");
+            }
+            return row;
+        }
+
+        /// <summary>Header button showing the current language's flag; tapping switches to the other language.</summary>
+        public static Button LanguageToggleButton(Transform parent)
+        {
+            var current = Core.Loc.Current;
+            var other = current == Core.AppLanguage.English ? Core.AppLanguage.Indonesian : Core.AppLanguage.English;
+            var btn = IconButton(parent, Core.Loc.FlagIcon(current),
+                Core.Loc.T("Bahasa: Indonesia. Ketuk untuk English", "Language: English. Tap for Bahasa Indonesia"),
+                () =>
+                {
+                    Core.Loc.Set(other);
+                    PopupController.Instance?.Toast(Core.Loc.T("Bahasa Indonesia dipilih", "English selected"), Icons.Globe);
+                }, ButtonVariant.Ghost, Color.white);
+            btn.name = "LanguageToggle";
+            return btn;
         }
 
         // ------------------------------------------------------------------ composite patterns

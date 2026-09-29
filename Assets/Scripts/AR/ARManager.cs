@@ -60,11 +60,21 @@ namespace ComputerExplorer.AR
             session.Ready += OnSessionReady;
             session.Failed += OnSessionFailed;
             session.Begin();
+            AccessibilityManager.Instance.Changed += OnSettingsChanged;
+        }
+
+        /// <summary>Language or contrast changed: refresh the 3D hotspot labels and colours.</summary>
+        private void OnSettingsChanged(AccessibilitySettings s)
+        {
+            foreach (var obj in objects.Values)
+                foreach (var hs in obj.Hotspots) hs.Refresh();
+            RefreshHotspots();
         }
 
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            if (AccessibilityManager.Instance != null) AccessibilityManager.Instance.Changed -= OnSettingsChanged;
         }
 
         // ------------------------------------------------------------------ session
@@ -81,7 +91,7 @@ namespace ComputerExplorer.AR
                 target.TrackingChanged += OnTrackingChanged;
             }
             Status = targets.Count > 0 ? ARTrackingState.Searching : ARTrackingState.Error;
-            if (targets.Count == 0) ErrorMessage = "Tidak ada target AR yang dapat dimuat.";
+            if (targets.Count == 0) ErrorMessage = Loc.T("Tidak ada target AR yang dapat dimuat.", "No AR targets could be loaded.");
             if (IsSimulated) session.ShowSimulatedCard(Focus ?? list.FirstOrDefault());
             Changed?.Invoke();
         }
@@ -111,7 +121,7 @@ namespace ComputerExplorer.AR
                 {
                     AudioManager.Instance.PlayFeedback(FeedbackSound.TargetFound);
                     if (AccessibilityManager.Instance.Settings.autoNarrate)
-                        AudioManager.Instance.Narration.Play($"Target terdeteksi: {Active.hardwareName}. {Active.function}");
+                        AudioManager.Instance.Narration.Play(Loc.T($"Target terdeteksi: {Active.hardwareName}. {Active.Function}", $"Target detected: {Active.hardwareName}. {Active.Function}"));
                 }
             }
             else if (Active == target.Hardware)
@@ -152,7 +162,7 @@ namespace ComputerExplorer.AR
             if (IsActivityComplete(h)) Saved.MarkARActivityCompleted(h.hardwareId);
             RefreshHotspots();
             if (AccessibilityManager.Instance.Settings.autoNarrate)
-                AudioManager.Instance.Narration.Play($"{data.label}. {data.description}", data.narration);
+                AudioManager.Instance.Narration.Play($"{data.Label}. {data.Description}", data.Clip);
             Changed?.Invoke();
         }
 

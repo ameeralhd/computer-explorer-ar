@@ -57,8 +57,9 @@ namespace ComputerExplorer.UI
                 return;
             }
 
-            ModalController.Instance.Confirm("Keluar dari aplikasi?",
-                "Progres belajarmu sudah tersimpan otomatis.", "Keluar", Application.Quit, Icons.Info);
+            ModalController.Instance.Confirm(Loc.T("Keluar dari aplikasi?", "Exit the app?"),
+                Loc.T("Progres belajarmu sudah tersimpan otomatis.", "Your learning progress has been saved automatically."),
+                Loc.T("Keluar", "Exit"), Application.Quit, Icons.Info);
         }
 
         private void Update()

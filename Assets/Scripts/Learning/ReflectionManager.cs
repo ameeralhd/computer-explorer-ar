@@ -6,7 +6,12 @@ namespace ComputerExplorer.Learning
     /// <summary>Stores a reflection and completes the lesson step when reflecting on a module.</summary>
     public static class ReflectionManager
     {
-        public static readonly string[] ConfidenceLabels = { "Belum paham", "Cukup paham", "Sudah paham" };
+        public static string[] ConfidenceLabels => new[]
+        {
+            Core.Loc.T("Belum paham", "I don't understand yet"),
+            Core.Loc.T("Cukup paham", "I partly understand"),
+            Core.Loc.T("Sudah paham", "I understand")
+        };
 
         public static void Submit(string contextId, int confidence, string response, bool completesLessonStep)
         {

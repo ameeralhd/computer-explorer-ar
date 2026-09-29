@@ -8,7 +8,7 @@ namespace ComputerExplorer.Audio
     public enum NarrationState { Off, Idle, Playing, Paused }
 
     /// <summary>
-    /// Educational narration in Bahasa Indonesia with play / pause / replay.
+    /// Educational narration (Bahasa Indonesia or English, following the app language) with play / pause / replay.
     /// Source priority: recorded AudioClip → Android TTS (id-ID) → Editor simulation (logged + timed),
     /// so the flow can be tested anywhere. Only one narration/instruction plays at a time.
     /// </summary>
@@ -53,8 +53,16 @@ namespace ComputerExplorer.Audio
             tts?.Dispose();
         }
 
+        private AppLanguage lastLanguage = Loc.Current;
+
         private void OnAccessibilityChanged(AccessibilitySettings s)
         {
+            // Never keep speaking the old language after a switch.
+            if (s.language != lastLanguage)
+            {
+                lastLanguage = s.language;
+                Stop();
+            }
             if (!s.narrationEnabled)
             {
                 Stop();

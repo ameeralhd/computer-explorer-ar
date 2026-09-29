@@ -35,7 +35,7 @@ namespace ComputerExplorer.UI.Screens
             var row = UIKit.HStack(content, DesignTokens.Space1, align: TextAnchor.MiddleCenter);
             var spinner = UIKit.Icon(row, Icons.Refresh, DesignTokens.IconSize, ColorRole.Primary);
             spinner.gameObject.AddComponent<SpinAnimator>();
-            UIKit.Label(row, "Menyiapkan…", TextStyle.Label, ColorRole.TextSecondary);
+            UIKit.Label(row, Loc.T("Menyiapkan…", "Getting ready…"), TextStyle.Label, ColorRole.TextSecondary);
         }
     }
 }

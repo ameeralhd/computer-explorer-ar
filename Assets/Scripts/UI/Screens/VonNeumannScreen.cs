@@ -15,16 +15,20 @@ namespace ComputerExplorer.UI.Screens
     /// </summary>
     public class VonNeumannScreen : ScreenBase
     {
-        protected override string Title => "Arsitektur Von Neumann";
+        protected override string Title => Loc.T("Arsitektur Von Neumann", "Von Neumann Architecture");
         protected override LessonStepType? LessonStep => LessonStepType.VonNeumann;
 
         protected override string ScreenNarration =>
-            "Arsitektur Von Neumann. Program dan data disimpan bersama di memori. CPU mengambil instruksi dari memori melalui bus, " +
-            "memprosesnya dengan Control Unit dan ALU, lalu mengirim hasilnya ke perangkat output. Ketuk komponen pada diagram " +
-            "untuk mempelajarinya, atau putar alur data.";
+            Loc.T("Arsitektur Von Neumann. Program dan data disimpan bersama di memori. CPU mengambil instruksi dari memori melalui bus, " +
+                  "memprosesnya dengan Control Unit dan ALU, lalu mengirim hasilnya ke perangkat output. Ketuk komponen pada diagram " +
+                  "untuk mempelajarinya, atau putar alur data.",
+                  "Von Neumann architecture. Programs and data are stored together in memory. The CPU fetches instructions from memory " +
+                  "over the bus, processes them with the Control Unit and ALU, then sends the results to an output device. Tap a " +
+                  "component in the diagram to learn about it, or play the data flow.");
 
         protected override string GuidanceText =>
-            "Ketuk setiap kotak pada diagram untuk membaca fungsinya. Lalu tekan \"Putar alur data\" untuk melihat perjalanan data.";
+            Loc.T("Ketuk setiap kotak pada diagram untuk membaca fungsinya. Lalu tekan \"Putar\" untuk melihat perjalanan data.",
+                  "Tap each box in the diagram to read what it does. Then press \"Play\" to watch the data travel.");
 
         private class Component
         {
@@ -45,40 +49,48 @@ namespace ComputerExplorer.UI.Screens
         private bool flowCompleted;
         private Coroutine player;
 
-        private static readonly FlowStep[] Flow =
+        private static FlowStep[] Flow => new[]
         {
-            new FlowStep { Title = "1. Input", Body = "Kamu menekan tombol A pada keyboard. Unit input mengubahnya menjadi kode biner.", Nodes = new[] { "input" } },
-            new FlowStep { Title = "2. Simpan di memori", Body = "Kode dikirim melalui bus dan disimpan sementara di memori (RAM).", Nodes = new[] { "bus", "memory" } },
-            new FlowStep { Title = "3. Fetch & decode", Body = "Control Unit mengambil (fetch) instruksi dan data dari memori, lalu menerjemahkannya (decode).", Nodes = new[] { "cu", "memory" } },
-            new FlowStep { Title = "4. Execute", Body = "ALU menjalankan (execute) instruksi. Hasil sementara disimpan di register.", Nodes = new[] { "alu", "reg" } },
-            new FlowStep { Title = "5. Output", Body = "Hasilnya dikirim ke unit output: huruf A muncul di monitor.", Nodes = new[] { "output" } },
-            new FlowStep { Title = "6. Simpan permanen", Body = "Saat kamu menekan Simpan, dokumen ditulis ke penyimpanan agar tidak hilang saat komputer dimatikan.", Nodes = new[] { "storage" } },
+            new FlowStep { Title = Loc.T("1. Input", "1. Input"), Body = Loc.T("Kamu menekan tombol A pada keyboard. Unit input mengubahnya menjadi kode biner.", "You press the A key on the keyboard. The input unit turns it into binary code."), Nodes = new[] { "input" } },
+            new FlowStep { Title = Loc.T("2. Simpan di memori", "2. Store in memory"), Body = Loc.T("Kode dikirim melalui bus dan disimpan sementara di memori (RAM).", "The code travels over the bus and is stored temporarily in memory (RAM)."), Nodes = new[] { "bus", "memory" } },
+            new FlowStep { Title = "3. Fetch & decode", Body = Loc.T("Control Unit mengambil (fetch) instruksi dan data dari memori, lalu menerjemahkannya (decode).", "The Control Unit fetches the instruction and data from memory, then decodes it."), Nodes = new[] { "cu", "memory" } },
+            new FlowStep { Title = "4. Execute", Body = Loc.T("ALU menjalankan (execute) instruksi. Hasil sementara disimpan di register.", "The ALU executes the instruction. The temporary result is kept in a register."), Nodes = new[] { "alu", "reg" } },
+            new FlowStep { Title = "5. Output", Body = Loc.T("Hasilnya dikirim ke unit output: huruf A muncul di monitor.", "The result goes to the output unit: the letter A appears on the monitor."), Nodes = new[] { "output" } },
+            new FlowStep { Title = Loc.T("6. Simpan permanen", "6. Save permanently"), Body = Loc.T("Saat kamu menekan Simpan, dokumen ditulis ke penyimpanan agar tidak hilang saat komputer dimatikan.", "When you press Save, the document is written to storage so it is not lost when the computer is switched off."), Nodes = new[] { "storage" } },
         };
 
         protected override void OnOpened()
         {
+            var vnHw = Content.GetHardware(Ids.VonNeumann);
+            if (vnHw != null) Saved.MarkHardwareViewed(vnHw.hardwareId);
+        }
+
+        /// <summary>Rebuilt on every render so the texts follow the current language.</summary>
+        private void BuildComponents()
+        {
+            components.Clear();
             var vn = Content.GetHardware(Ids.VonNeumann);
             var cpu = Content.GetHardware(Ids.Cpu);
             var storage = Content.GetHardware(Ids.Storage);
-            Add("input", "Unit Input", Icons.Keyboard, Hotspot(vn, "input"));
+            Add("input", Loc.T("Unit Input", "Input Unit"), Icons.Keyboard, Hotspot(vn, "input"));
             Add("cu", "Control Unit (CU)", Icons.Circuit, Hotspot(cpu, "control_unit"));
             Add("alu", "ALU", Icons.Cpu, Hotspot(cpu, "alu"));
             Add("reg", "Register", Icons.Layers, Hotspot(cpu, "registers"));
-            Add("memory", "Memori (RAM)", Icons.Memory, Hotspot(vn, "memory"));
-            Add("storage", "Penyimpanan", Icons.Storage, storage != null ? $"{storage.shortDescription} {storage.function}" : "");
-            Add("output", "Unit Output", Icons.Monitor, Hotspot(vn, "output"));
-            Add("bus", "Bus Sistem", Icons.Link, Hotspot(vn, "bus"));
-            if (vn != null) Saved.MarkHardwareViewed(vn.hardwareId);
+            Add("memory", Loc.T("Memori (RAM)", "Memory (RAM)"), Icons.Memory, Hotspot(vn, "memory"));
+            Add("storage", Loc.T("Penyimpanan", "Storage"), Icons.Storage, storage != null ? $"{storage.ShortDescription} {storage.Function}" : "");
+            Add("output", Loc.T("Unit Output", "Output Unit"), Icons.Monitor, Hotspot(vn, "output"));
+            Add("bus", Loc.T("Bus Sistem", "System Bus"), Icons.Link, Hotspot(vn, "bus"));
         }
 
-        private static string Hotspot(HardwareData h, string id) => h?.FindHotspot(id)?.description ?? "";
+        private static string Hotspot(HardwareData h, string id) => h?.FindHotspot(id)?.Description ?? "";
 
         private void Add(string id, string title, string icon, string body) =>
             components[id] = new Component { Id = id, Title = title, Icon = icon, Body = body };
 
         protected override void BuildContent(RectTransform content)
         {
-            UIKit.Label(content, "Program dan data disimpan bersama di memori. CPU mengambil, memproses, lalu mengirim hasil.",
+            BuildComponents();
+            UIKit.Label(content, Loc.T("Program dan data disimpan bersama di memori. CPU mengambil, memproses, lalu mengirim hasil.", "Programs and data are stored together in memory. The CPU fetches, processes and sends out results."),
                 TextStyle.Body, ColorRole.TextSecondary);
 
             BuildDiagram(content);
@@ -87,7 +99,7 @@ namespace ComputerExplorer.UI.Screens
 
             var ar = Content.GetHardware(Ids.VonNeumann);
             if (ar != null)
-                UIKit.Button(content, "Lihat model 3D dalam AR", () =>
+                UIKit.Button(content, Loc.T("Lihat model 3D dalam AR", "View the 3D model in AR"), () =>
                 {
                     State.SelectHardware(ar.hardwareId);
                     State.ARReturnScene = AppConstants.Scenes.VonNeumann;
@@ -164,15 +176,15 @@ namespace ComputerExplorer.UI.Screens
                 var iconRow = UIKit.HStack(box, 0, align: TextAnchor.MiddleCenter);
                 UIKit.Icon(iconRow, isSel ? Icons.CheckCircle : c.Icon, DesignTokens.IconSizeSmall, fg);
             }
-            string shortTitle = id switch { "cu" => "CU", "alu" => "ALU", "reg" => "Register", "bus" => "Bus", "memory" => "Memori", "storage" => "Penyimpanan", "input" => "Input", "output" => "Output", _ => c.Title };
+            string shortTitle = id switch { "cu" => "CU", "alu" => "ALU", "reg" => "Register", "bus" => "Bus", "memory" => Loc.T("Memori", "Memory"), "storage" => Loc.T("Penyimpanan", "Storage"), "input" => "Input", "output" => "Output", _ => c.Title };
             UIKit.LabelColored(box, shortTitle, TextStyle.Label, fg, TextAnchor.MiddleCenter);
-            if (active) UIKit.LabelColored(box, "aktif", TextStyle.Overline, P.Warning, TextAnchor.MiddleCenter);
+            if (active) UIKit.LabelColored(box, Loc.T("aktif", "active"), TextStyle.Overline, P.Warning, TextAnchor.MiddleCenter);
 
             var btn = root.gameObject.AddComponent<UnityEngine.UI.Button>();
             btn.targetGraphic = box.GetComponent<UnityEngine.UI.Image>();
             btn.onClick.AddListener(() => Select(id));
             root.gameObject.AddComponent<ButtonAudio>();
-            root.gameObject.AddComponent<Components.AccessibleLabel>().label = c.Title + (isSel ? " (dipilih)" : "");
+            root.gameObject.AddComponent<Components.AccessibleLabel>().label = c.Title + (isSel ? Loc.T(" (dipilih)", " (selected)") : "");
         }
 
         private static void Arrow(Transform parent, float rotation)
@@ -200,8 +212,8 @@ namespace ComputerExplorer.UI.Screens
         {
             if (selected == null)
             {
-                UIKit.Callout(content, Icons.Hand, "Ketuk komponen pada diagram",
-                    $"Kamu sudah menjelajahi {visited.Count} dari {components.Count} komponen.");
+                UIKit.Callout(content, Icons.Hand, Loc.T("Ketuk komponen pada diagram", "Tap a component in the diagram"),
+                    Loc.T($"Kamu sudah menjelajahi {visited.Count} dari {components.Count} komponen.", $"You have explored {visited.Count} of {components.Count} components."));
                 return;
             }
             var c = components[selected];
@@ -209,42 +221,42 @@ namespace ComputerExplorer.UI.Screens
             var head = UIKit.HStack(card, DesignTokens.Dp(12));
             UIKit.IconTile(head, c.Icon, P.Primary, P.OnPrimary, DesignTokens.Dp(44));
             UIKit.Flex(UIKit.Label(head, c.Title, TextStyle.Heading));
-            UIKit.IconButton(head, Icons.Close, "Tutup penjelasan", () => Select(selected));
+            UIKit.IconButton(head, Icons.Close, Loc.T("Tutup penjelasan", "Close explanation"), () => Select(selected));
             UIKit.Label(card, c.Body, TextStyle.Body);
             NarrationControl(card, $"{c.Title}. {c.Body}");
-            UIKit.Label(card, $"Dijelajahi: {visited.Count}/{components.Count} komponen", TextStyle.Caption, ColorRole.TextSecondary);
+            UIKit.Label(card, Loc.T($"Dijelajahi: {visited.Count}/{components.Count} komponen", $"Explored: {visited.Count}/{components.Count} components"), TextStyle.Caption, ColorRole.TextSecondary);
         }
 
         // ------------------------------------------------------------------ data flow player
         private void BuildFlowPlayer(RectTransform content)
         {
-            UIKit.SectionHeader(content, "Alur data: mengetik huruf \"A\"",
-                MotionController.Reduced ? "Gunakan tombol Berikutnya untuk melihat setiap langkah." : "Putar otomatis atau telusuri langkah demi langkah.");
+            UIKit.SectionHeader(content, Loc.T("Alur data: mengetik huruf \"A\"", "Data flow: typing the letter \"A\""),
+                MotionController.Reduced ? Loc.T("Gunakan tombol Berikutnya untuk melihat setiap langkah.", "Use the Next button to see each step.") : Loc.T("Putar otomatis atau telusuri langkah demi langkah.", "Play it automatically or step through it."));
             var card = UIKit.Card(content, spacing: DesignTokens.Dp(12));
             if (flowIndex < 0)
             {
-                UIKit.Label(card, "Ikuti perjalanan data dari keyboard sampai ke layar. Komponen yang sedang bekerja ditandai \"aktif\".",
+                UIKit.Label(card, Loc.T("Ikuti perjalanan data dari keyboard sampai ke layar. Komponen yang sedang bekerja ditandai \"aktif\".", "Follow the data from the keyboard to the screen. The component that is working is marked \"active\"."),
                     TextStyle.Body);
             }
             else
             {
                 var step = Flow[flowIndex];
-                UIKit.Label(card, $"Langkah {flowIndex + 1} dari {Flow.Length}", TextStyle.Overline, ColorRole.TextSecondary);
+                UIKit.Label(card, Loc.T($"Langkah {flowIndex + 1} dari {Flow.Length}", $"Step {flowIndex + 1} of {Flow.Length}"), TextStyle.Overline, ColorRole.TextSecondary);
                 UIKit.Label(card, step.Title, TextStyle.Heading);
                 UIKit.Label(card, step.Body, TextStyle.Body);
                 UIKit.ProgressBar(card, (flowIndex + 1f) / Flow.Length);
                 NarrationControl(card, step.Body);
             }
             var row = UIKit.EqualRow(card, DesignTokens.Space1);
-            UIKit.Button(row, "Sebelumnya", () => StepFlow(-1), ButtonVariant.Secondary, Icons.Back,
+            UIKit.Button(row, Loc.T("Sebelumnya", "Previous"), () => StepFlow(-1), ButtonVariant.Secondary, Icons.Back,
                 flowIndex > 0 ? ButtonState.Normal : ButtonState.Disabled, compact: true);
             if (!MotionController.Reduced)
-                UIKit.Button(row, playing ? "Jeda" : flowIndex < 0 ? "Putar" : "Lanjut putar", TogglePlay, ButtonVariant.Primary,
+                UIKit.Button(row, playing ? Loc.T("Jeda", "Pause") : flowIndex < 0 ? Loc.T("Putar", "Play") : Loc.T("Lanjut putar", "Resume"), TogglePlay, ButtonVariant.Primary,
                     playing ? Icons.Pause : Icons.Play, compact: true);
-            UIKit.Button(row, "Berikutnya", () => StepFlow(1), ButtonVariant.Secondary, Icons.Forward,
+            UIKit.Button(row, Loc.T("Berikutnya", "Next"), () => StepFlow(1), ButtonVariant.Secondary, Icons.Forward,
                 flowIndex < Flow.Length - 1 ? ButtonState.Normal : ButtonState.Disabled, compact: true, iconRight: true);
             if (flowCompleted)
-                UIKit.Callout(card, Icons.CheckCircle, "Alur data selesai", "Kamu sudah mengikuti seluruh perjalanan data.",
+                UIKit.Callout(card, Icons.CheckCircle, Loc.T("Alur data selesai", "Data flow complete"), Loc.T("Kamu sudah mengikuti seluruh perjalanan data.", "You have followed the whole journey of the data."),
                     ColorRole.Success, ColorRole.SuccessSoft);
         }
 
@@ -293,7 +305,7 @@ namespace ComputerExplorer.UI.Screens
         protected override void BuildFooter(RectTransform footer)
         {
             bool ready = flowCompleted || visited.Count >= 4;
-            AddLessonContinue(footer, ready, "Jelajahi minimal 4 komponen atau selesaikan alur data untuk melanjutkan.");
+            AddLessonContinue(footer, ready, Loc.T("Jelajahi minimal 4 komponen atau selesaikan alur data untuk melanjutkan.", "Explore at least 4 components or finish the data flow to continue."));
         }
     }
 }

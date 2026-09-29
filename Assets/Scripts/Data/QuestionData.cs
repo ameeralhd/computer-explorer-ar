@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComputerExplorer.Core;
 using UnityEngine;
 
 namespace ComputerExplorer.Data
@@ -20,13 +21,13 @@ namespace ComputerExplorer.Data
     {
         public static string DisplayName(this QuestionType t) => t switch
         {
-            QuestionType.MultipleChoice => "Pilihan Ganda",
-            QuestionType.TrueFalse => "Benar / Salah",
-            QuestionType.Matching => "Menjodohkan",
-            QuestionType.Identification => "Identifikasi",
-            QuestionType.Ordering => "Mengurutkan",
-            QuestionType.ContextualScenario => "Soal Kontekstual",
-            QuestionType.ARIdentification => "Identifikasi AR",
+            QuestionType.MultipleChoice => Loc.T("Pilihan Ganda", "Multiple Choice"),
+            QuestionType.TrueFalse => Loc.T("Benar / Salah", "True / False"),
+            QuestionType.Matching => Loc.T("Menjodohkan", "Matching"),
+            QuestionType.Identification => Loc.T("Identifikasi", "Identification"),
+            QuestionType.Ordering => Loc.T("Mengurutkan", "Ordering"),
+            QuestionType.ContextualScenario => Loc.T("Soal Kontekstual", "Contextual Question"),
+            QuestionType.ARIdentification => Loc.T("Identifikasi AR", "AR Identification"),
             _ => t.ToString()
         };
 
@@ -41,14 +42,17 @@ namespace ComputerExplorer.Data
     {
         public string left;
         public string right;
+        public string leftEn;
+        public string rightEn;
     }
 
     /// <summary>
-    /// One practice item. Answer format per type:
-    /// single-choice types → correctAnswer = option text;
-    /// Identification → correctAnswer = accepted answers separated by "|";
-    /// Ordering → options are stored in the correct order (shuffled on screen);
-    /// Matching → pairs.
+    /// One practice item. Answers are evaluated by <b>position</b>, so switching language mid-question never
+    /// changes the result. Answer format per type:
+    /// single-choice → correctAnswer = the Indonesian option text (optionsEn is the same list in English);
+    /// Identification → correctAnswer / correctAnswerEn = accepted answers separated by "|" (both are accepted);
+    /// Ordering → options stored in the correct order (shuffled on screen);
+    /// Matching → pairs (the right-hand values are grouped by their Indonesian text).
     /// </summary>
     [CreateAssetMenu(menuName = "Computer Explorer/Question Data", fileName = "Question_")]
     public class QuestionData : ScriptableObject
@@ -64,29 +68,70 @@ namespace ComputerExplorer.Data
         public string correctAnswer;
         public List<MatchPair> pairs = new List<MatchPair>();
         [TextArea(2, 6)] public string explanation;
+
+        [Header("English")]
+        [TextArea(2, 5)] public string questionTextEn;
+        public List<string> optionsEn = new List<string>();
+        public string correctAnswerEn;
+        [TextArea(2, 6)] public string explanationEn;
+        public AudioClip audioEn;
+
         public HardwareData relatedHardware;
         public string relatedModuleId;
 
-        public bool Evaluate(string singleAnswer) => questionType switch
+        // ------------------------------------------------------------------ language-aware accessors
+        public string Text => Loc.T(questionText, questionTextEn);
+        public string Explanation => Loc.T(explanation, explanationEn);
+        public AudioClip Clip => Loc.Clip(audio, audioEn);
+
+        public string OptionText(int index)
         {
-            QuestionType.Identification => Normalize(singleAnswer) != "" &&
-                                           (correctAnswer ?? "").Split('|').Any(a => Normalize(a) == Normalize(singleAnswer)),
-            _ => Normalize(singleAnswer) == Normalize(correctAnswer)
-        };
+            if (index < 0 || index >= options.Count) return "";
+            return Loc.IsEnglish && optionsEn != null && index < optionsEn.Count && !string.IsNullOrEmpty(optionsEn[index])
+                ? optionsEn[index]
+                : options[index];
+        }
 
-        public bool EvaluateOrder(IList<string> order) =>
-            order != null && order.Count == options.Count && order.SequenceEqual(options);
+        public IEnumerable<string> OptionTexts => Enumerable.Range(0, options.Count).Select(OptionText);
 
-        public bool EvaluateMatching(IDictionary<string, string> leftToRight) =>
-            leftToRight != null && pairs.Count > 0 &&
-            pairs.All(p => leftToRight.TryGetValue(p.left, out var r) && r == p.right);
+        public string LeftText(int pairIndex) => Loc.T(pairs[pairIndex].left, pairs[pairIndex].leftEn);
+
+        /// <summary>Distinct right-hand values (Indonesian keys) in pair order.</summary>
+        public List<string> RightKeys => pairs.Select(p => p.right).Distinct().ToList();
+
+        public string RightText(string rightKey)
+        {
+            var p = pairs.FirstOrDefault(x => x.right == rightKey);
+            return p == null ? rightKey : Loc.T(p.right, p.rightEn);
+        }
+
+        public int CorrectIndex => options.FindIndex(o => Normalize(o) == Normalize(correctAnswer));
+
+        // ------------------------------------------------------------------ evaluation (language independent)
+        public bool EvaluateChoice(int selectedIndex) => selectedIndex >= 0 && selectedIndex == CorrectIndex;
+
+        public bool EvaluateText(string answer)
+        {
+            if (Normalize(answer) == "") return false;
+            var accepted = ((correctAnswer ?? "") + "|" + (correctAnswerEn ?? "")).Split('|');
+            return accepted.Any(a => Normalize(a) != "" && Normalize(a) == Normalize(answer));
+        }
+
+        /// <summary>Ordering: the learner's sequence of option indices must be 0, 1, 2, …</summary>
+        public bool EvaluateOrder(IList<int> order) =>
+            order != null && order.Count == options.Count && order.Select((v, i) => v == i).All(x => x);
+
+        /// <summary>Matching: pair index → chosen right key.</summary>
+        public bool EvaluateMatching(IDictionary<int, string> chosen) =>
+            chosen != null && pairs.Count > 0 &&
+            pairs.Select((p, i) => chosen.TryGetValue(i, out var r) && r == p.right).All(x => x);
 
         public string CorrectAnswerDisplay => questionType switch
         {
-            QuestionType.Ordering => string.Join("  ›  ", options),
-            QuestionType.Matching => string.Join("\n", pairs.Select(p => $"{p.left}  —  {p.right}")),
-            QuestionType.Identification => (correctAnswer ?? "").Split('|')[0],
-            _ => correctAnswer
+            QuestionType.Ordering => string.Join("  ›  ", OptionTexts),
+            QuestionType.Matching => string.Join("\n", pairs.Select((p, i) => $"{LeftText(i)}  —  {RightText(p.right)}")),
+            QuestionType.Identification => Loc.T(correctAnswer, correctAnswerEn)?.Split('|')[0],
+            _ => OptionText(CorrectIndex)
         };
 
         public static string Normalize(string s) =>

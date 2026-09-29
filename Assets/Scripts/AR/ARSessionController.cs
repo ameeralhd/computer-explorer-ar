@@ -91,10 +91,12 @@ namespace ComputerExplorer.AR
             if (error == VuforiaInitError.NONE) return;
             string code = error.ToString();
             string message =
-                code.Contains("LICENSE") ? "Kunci lisensi Vuforia belum diatur atau tidak valid. Minta guru/pengembang mengisi License Key di Vuforia Configuration." :
-                code.Contains("PERMISSION") || code.Contains("CAMERA") ? "Aplikasi tidak dapat membuka kamera. Izinkan akses kamera di Pengaturan perangkat, lalu coba lagi." :
-                code.Contains("DEVICE") ? "Perangkat ini belum didukung oleh Vuforia AR." :
-                $"AR tidak dapat dimulai ({code}).";
+                code.Contains("LICENSE") ? Loc.T("Kunci lisensi Vuforia belum diatur atau tidak valid. Minta guru/pengembang mengisi License Key di Vuforia Configuration.",
+                                                 "The Vuforia license key is missing or invalid. Ask your teacher/developer to enter the License Key in Vuforia Configuration.") :
+                code.Contains("PERMISSION") || code.Contains("CAMERA") ? Loc.T("Aplikasi tidak dapat membuka kamera. Izinkan akses kamera di Pengaturan perangkat, lalu coba lagi.",
+                                                                               "The app cannot open the camera. Allow camera access in your device Settings, then try again.") :
+                code.Contains("DEVICE") ? Loc.T("Perangkat ini belum didukung oleh Vuforia AR.", "This device is not supported by Vuforia AR.") :
+                Loc.T($"AR tidak dapat dimulai ({code}).", $"AR could not start ({code}).");
             Failed?.Invoke(message);
         }
 

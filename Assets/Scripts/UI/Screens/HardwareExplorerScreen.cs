@@ -11,13 +11,15 @@ namespace ComputerExplorer.UI.Screens
     /// <summary>06_HardwareExplorer — category filters and hardware cards; a card opens the description and AR launch.</summary>
     public class HardwareExplorerScreen : ScreenBase
     {
-        protected override string Title => "Jelajah Hardware";
+        protected override string Title => Loc.T("Jelajah Hardware", "Hardware Explorer");
         protected override LessonStepType? LessonStep => LessonStepType.HardwareExplorer;
 
         protected override string ScreenNarration =>
-            "Jelajah hardware. Pilih kategori di bagian atas, lalu ketuk kartu perangkat untuk membaca fungsinya dan membukanya dalam AR.";
+            Loc.T("Jelajah hardware. Pilih kategori di bagian atas, lalu ketuk kartu perangkat untuk membaca fungsinya dan membukanya dalam AR.",
+                  "Hardware explorer. Choose a category at the top, then tap a device card to read what it does and open it in AR.");
 
-        protected override string GuidanceText => "Ketuk kartu perangkat untuk melihat penjelasan. Tombol \"Lihat dalam AR\" membuka kamera.";
+        protected override string GuidanceText => Loc.T("Ketuk kartu perangkat untuk melihat penjelasan. Tombol \"Lihat dalam AR\" membuka kamera.",
+            "Tap a device card to see its explanation. The \"View in AR\" button opens the camera.");
 
         private HardwareCategory? filter;
         private const int RequiredViews = 3;
@@ -53,7 +55,7 @@ namespace ComputerExplorer.UI.Screens
             scroll.viewport = viewport;
             scroll.content = row;
 
-            UIKit.Chip(row, "Semua", filter == null, () => SetFilter(null), Icons.Layers);
+            UIKit.Chip(row, Loc.T("Semua", "All"), filter == null, () => SetFilter(null), Icons.Layers);
             foreach (var cat in Content.Hardware.Select(x => x.category).Distinct())
             {
                 var c = cat;
@@ -72,7 +74,7 @@ namespace ComputerExplorer.UI.Screens
         protected override void BuildContent(RectTransform content)
         {
             var items = Content.Hardware.Where(x => filter == null || x.category == filter).ToList();
-            UIKit.Label(content, $"{items.Count} perangkat · {Saved.Data.viewedHardware.Count} sudah kamu lihat", TextStyle.Label,
+            UIKit.Label(content, Loc.T($"{items.Count} perangkat · {Saved.Data.viewedHardware.Count} sudah kamu lihat", $"{items.Count} devices · {Saved.Data.viewedHardware.Count} viewed"), TextStyle.Label,
                 ColorRole.TextSecondary);
 
             int perRow = TextSizeController.IsLarge ? 1 : 2;
@@ -98,9 +100,9 @@ namespace ComputerExplorer.UI.Screens
             UIKit.FlexSpacer(top);
             if (viewed) UIKit.Icon(top, Icons.Eye, DesignTokens.IconSizeSmall, ColorRole.Success);
             UIKit.Label(card, h.hardwareName, TextStyle.Heading);
-            UIKit.Label(card, h.category.DisplayName() + (viewed ? " · dilihat" : ""), TextStyle.Overline,
+            UIKit.Label(card, h.category.DisplayName() + (viewed ? Loc.T(" · dilihat", " · seen") : ""), TextStyle.Overline,
                 viewed ? ColorRole.Success : ColorRole.TextSecondary);
-            UIKit.Label(card, h.shortDescription, TextStyle.Caption, ColorRole.TextSecondary);
+            UIKit.Label(card, h.ShortDescription, TextStyle.Caption, ColorRole.TextSecondary);
         }
 
         protected override void BuildFooter(RectTransform footer)
@@ -110,7 +112,7 @@ namespace ComputerExplorer.UI.Screens
             var set = new HashSet<string>(module.hardware.Select(x => x.hardwareId));
             int seen = Saved.Data.viewedHardware.Count(set.Contains);
             int need = Mathf.Min(RequiredViews, set.Count);
-            AddLessonContinue(footer, seen >= need, $"Lihat minimal {need} perangkat dari modul ini ({seen}/{need}).");
+            AddLessonContinue(footer, seen >= need, Loc.T($"Lihat minimal {need} perangkat dari modul ini ({seen}/{need}).", $"View at least {need} devices from this module ({seen}/{need})."));
         }
     }
 }

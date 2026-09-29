@@ -1,0 +1,14 @@
+# Render Blueprint: hosts the web version (web/) as a free static site. No build step needed.
+services:
+  - type: web
+    name: computer-explorer-ar
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: ./web
+    headers:
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(self)
+      - path: /targets/*
+        name: Cache-Control
+        value: public, max-age=604800

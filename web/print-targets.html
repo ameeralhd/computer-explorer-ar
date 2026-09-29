@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kartu Target AR / AR Target Cards</title>
+  <style>
+    :root { --bg: #fff; --text: #111827; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+    .intro { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+    .intro button { font: inherit; font-weight: 700; padding: 12px 20px; border-radius: 12px; border: 0; background: #1D4ED8; color: #fff; cursor: pointer; }
+    .cards { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; padding: 16px; }
+    figure { margin: 0; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+    figure img { width: 15cm; max-width: calc(100vw - 32px); border: 1px dashed #9CA3AF; display: block; }
+    figcaption { font-weight: 700; margin-top: 6px; }
+    @media print { .intro { display: none; } .cards { display: block; padding: 0; } figure { page-break-after: always; margin: 1cm auto; } figure img { max-width: none; } }
+  </style>
+</head>
+<body>
+  <div class="intro">
+    <h1>Kartu Target AR / AR Target Cards</h1>
+    <p>Cetak dengan skala 100% (lebar 15 cm), satu kartu per halaman, di kertas tidak mengilap. Kamu juga bisa menampilkan kartu ini di layar laptop lalu memindainya dengan ponsel.</p>
+    <p>Print at 100% scale (15 cm wide), one card per page, on non-glossy paper. You can also show a card on a laptop screen and scan it with your phone.</p>
+    <button onclick="print()">Cetak / Print</button>
+  </div>
+  <div class="cards">
+    <figure><img src="targets/CPU_Target.png" alt="CPU"><figcaption>CPU</figcaption></figure>
+    <figure><img src="targets/Memory_Target.png" alt="RAM"><figcaption>RAM</figcaption></figure>
+    <figure><img src="targets/Storage_Target.png" alt="Storage"><figcaption>Storage</figcaption></figure>
+    <figure><img src="targets/Keyboard_Target.png" alt="Keyboard"><figcaption>Keyboard</figcaption></figure>
+    <figure><img src="targets/Mouse_Target.png" alt="Mouse"><figcaption>Mouse</figcaption></figure>
+    <figure><img src="targets/Monitor_Target.png" alt="Monitor"><figcaption>Monitor</figcaption></figure>
+    <figure><img src="targets/Printer_Target.png" alt="Printer"><figcaption>Printer</figcaption></figure>
+    <figure><img src="targets/Speaker_Target.png" alt="Speaker"><figcaption>Speaker</figcaption></figure>
+    <figure><img src="targets/VonNeumann_Target.png" alt="Von Neumann"><figcaption>Von Neumann</figcaption></figure>
+  </div>
+</body>
+</html>

@@ -58,6 +58,14 @@ function iconInner(name) {
 
 for (const name of ICONS) render(iconSvg(name), 128, path.join(res, 'Icons', `${name}.png`));
 console.log(`icons: ${ICONS.length}`);
+// SVG sprite for the web version (web/assets/icons.svg): <svg><use href="assets/icons.svg#cpu"/></svg>
+{
+  const symbols = ICONS.map(n => `<symbol id="${n}" viewBox="0 0 24 24">${iconInner(n)}</symbol>`).join('\n');
+  const webAssets = path.join(root, 'web', 'assets');
+  fs.mkdirSync(webAssets, { recursive: true });
+  fs.writeFileSync(path.join(webAssets, 'icons.svg'), `<svg xmlns="http://www.w3.org/2000/svg">${symbols}</svg>`);
+}
+
 // Language flags (full colour — not tinted). Indonesia 3:2, United Kingdom for English.
 const flagId = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="100" viewBox="0 0 150 100">
   <clipPath id="r"><rect width="150" height="100" rx="12"/></clipPath>

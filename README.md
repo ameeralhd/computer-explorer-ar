@@ -1,7 +1,7 @@
 # Computer Explorer AR
 
 **An inclusive, contextual augmented-reality app for learning computer hardware and computer architecture.**
-Built with Unity and Vuforia Engine. It follows the *Inclusive & Contextual AR Learning Application — Developer Blueprint*.
+Built with Unity and Vuforia Engine, plus a **no-install web version** in [`web/`](web) that runs in any browser. It follows the *Inclusive & Contextual AR Learning Application — Developer Blueprint*.
 
 **Bilingual: Bahasa Indonesia and English.** Tap a flag to switch the whole app, including every lesson,
 question and the narration voice.
@@ -27,6 +27,57 @@ on every screen.
 
 > The full design system (tokens, type scale, component states and all screens at 360 × 780 dp) is in
 > **[`Docs/design/index.html`](Docs/design/index.html)**. Open it in a browser.
+
+---
+
+## 🌐 Web version — no Unity, no install (easiest way to test)
+
+The folder **[`web/`](web)** contains a complete browser version of the app with the same content, the same
+two languages, the same screens and the same accessibility settings. It runs on any phone or laptop browser,
+uses the phone camera for real AR (MindAR image tracking + three.js), and has a **Simulation Mode** for devices
+without a camera. No build step, no license, no app store.
+
+<p align="center"><img src="Docs/web/screens-1.png" width="100%"></p>
+<p align="center"><img src="Docs/web/screens-3.png" width="100%"></p>
+
+### Put it online for free with Render (recommended)
+
+1. Go to **https://render.com** and sign up with your GitHub account (free).
+2. Click **New +** → **Static Site**.
+3. Choose the repository **`computer-explorer-ar`**.
+4. Fill in: **Branch** `main` · **Build Command** *(leave empty)* · **Publish Directory** `web`.
+5. Click **Create Static Site**. After about a minute you get a link like `https://computer-explorer-ar.onrender.com`.
+6. Open that link on your phone (Chrome on Android or Safari on iPhone), allow the camera, and scan a card.
+
+The repository also contains [`render.yaml`](render.yaml), so **New + → Blueprint** works as well.
+Every time you push to GitHub, Render updates the site automatically.
+
+> The camera only works on **https://** links (Render, GitHub Pages and Netlify all give you https automatically).
+
+### Other free options
+- **GitHub Pages:** repository **Settings → Pages → Deploy from a branch → `main` / root**. The app is then at
+  `https://<username>.github.io/computer-explorer-ar/web/`.
+- **Netlify Drop:** drag the `web` folder onto https://app.netlify.com/drop.
+- **On your own laptop:** `cd web && python3 -m http.server 8000`, then open http://localhost:8000
+  (the camera works on `localhost`; use Simulation Mode if the laptop has no webcam).
+
+### How to test
+1. Print the target cards from **`/print-targets.html`** (Help → *Print cards*), 15 cm wide. You can also show
+   a card on a laptop screen and scan it with the phone.
+2. Open the app → choose **Bahasa Indonesia** or **English** → *Start Learning* → Module 1.
+3. On the AR step, point the phone at the **CPU** card, tap the orange dots (ALU, Control Unit, Registers).
+4. No card or camera? Tap **Use Simulation Mode** and choose a card on screen.
+5. To add it like an app: Chrome menu ⋮ → *Add to Home screen* (Safari: Share → *Add to Home Screen*).
+
+Progress and settings are saved in the browser on each device (`localStorage`). The narration uses the device's
+built-in text-to-speech voices (Indonesian voices are best on Chrome for Android).
+
+| | Unity app (`Assets/`) | Web app (`web/`) |
+|---|---|---|
+| Needs install / license | Unity 6 + Vuforia | Nothing — just a link |
+| Runs on | Android APK / iOS | Any modern browser (phone, tablet, laptop) |
+| AR engine | Vuforia Engine | MindAR (open source, MIT) |
+| Hosting | Google Play / APK file | Render, GitHub Pages, Netlify (free) |
 
 ---
 
